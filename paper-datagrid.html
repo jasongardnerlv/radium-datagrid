@@ -31,6 +31,9 @@ Material Design inspired data grid component
     #dgheader ::content > paper-datagrid-column{
       line-height: 56px;
     }
+    :host([selection-enabled]) ::content .row:hover {
+      background-color: #EEEEEE;
+    }
     :host ::content .row paper-datagrid-column:first-of-type {
       padding-left: 24px;
     }
@@ -165,7 +168,8 @@ Material Design inspired data grid component
         },
         selectionEnabled: {
           type: Boolean,
-          value: false
+          value: false,
+          reflectToAttribute: true
         },
         selectedItem: {
           type: Object,
