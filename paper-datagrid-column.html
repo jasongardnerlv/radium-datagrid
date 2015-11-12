@@ -1,0 +1,219 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<dom-module id="paper-datagrid-column">
+  <style is="custom-style">
+    :host {
+      padding-left: 12px;
+      padding-right: 12px;
+      line-height: 48px;
+      cursor: default;
+    }
+    :host.selected {
+      background-color: #F5F5F5;
+    }
+    #dgcolumn {
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.87);
+      font-weight: 400;
+    }
+    #dgcolumn > ::content .col-header {
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.54);
+      font-weight: 400;
+    }
+    #dgcolumn > ::content .col-header[data-sortable] {
+      cursor: pointer;
+    }
+    #dgcolumn > ::content .col-header > iron-icon {
+      margin-right: 4px;
+      pointer-events: none;
+      display: none;
+      width: 16px;
+      height: 16px;
+    }
+    #dgcolumn > ::content .col-header:hover > iron-icon {
+      display: inline-block;
+      -ms-transform: rotate(-90deg);
+      -webkit-transform: rotate(-90deg);
+      transform: rotate(-90deg);
+      color: rgba(0, 0, 0, 0.26);
+    }
+    #dgcolumn > ::content .col-header > div {
+      pointer-events: none;
+      display: inline-block;
+    }
+    #dgcolumn > ::content .col-header:not([data-sortable]) > iron-icon {
+      display: none;
+    }
+    #dgcolumn > ::content .col-header.sort-asc {
+      color: rgba(0, 0, 0, 0.87);
+    }
+    #dgcolumn > ::content .col-header.sort-asc > iron-icon {
+      -ms-transform: rotate(-90deg);
+      -webkit-transform: rotate(-90deg);
+      transform: rotate(-90deg);
+      display: inline-block;
+      color: rgba(0, 0, 0, 0.87);
+    }
+    #dgcolumn > ::content .col-header.sort-desc {
+      color: rgba(0, 0, 0, 0.87);
+    }
+    #dgcolumn > ::content .col-header.sort-desc > iron-icon {
+      -ms-transform: rotate(90deg);
+      -webkit-transform: rotate(90deg);
+      transform: rotate(90deg);
+      display: inline-block;
+      color: rgba(0, 0, 0, 0.87);
+    }
+  </style>
+  <template>
+    <div id="dgcolumn">
+      <content></content>
+    </div>
+    <template id="headerTpl">
+      <div data-id$="[[id]]" data-sortable$="[[sortable]]" on-click="_sortHandler"
+          style$="[[_computeHeaderStyle(columnWidth)]]" class$="[[_computeHeaderClass(columnWidth, _sortDirection)]]">
+        <iron-icon icon="arrow-forward"></iron-icon>
+        <div>[[header]]</div>
+      </div>
+    </template>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'paper-datagrid-column',
+      properties: {
+        _sortDirection: {
+          type:String,
+          value: null
+        },
+        id: {
+          type: String,
+          value: ''
+        },
+        columnWidth: {
+          type: String,
+          value: ''
+        },
+        header: {
+          type: String,
+          value: ''
+        },
+        alignment: {
+          type: String,
+          value: 'left'
+        },
+        sortable: {
+          type: Boolean,
+          value: false
+        },
+        _isHeader: {
+          type: Boolean,
+          value: false
+        },
+        _model: Object
+      },
+      behaviors: [Polymer.Templatizer],
+      observers: [
+        '_widthChanged(columnWidth)',
+        '_headerChanged(header)',
+        '_alignmentChanged(alignment)',
+        '_modelChanged(_model)'
+      ],
+      _widthChanged: function() {
+        this._checkHeader();
+        this.toggleClass('flex', false);
+        this.style['min-width'] = '';
+        if (this.columnWidth === '' || this.columnWidth === '*') {
+          this.toggleClass('flex', true);
+        } else {
+          this.style['min-width'] = this.columnWidth;
+        }
+      },
+      _headerChanged: function() {
+        this._checkHeader();
+        if (this._isHeader) {
+          var colDom = Polymer.dom(this.$.dgcolumn);
+          if (colDom.childNodes.length > 0) {
+            for (var c = colDom.childNodes.length - 1; c >= 0; c--) {
+              colDom.removeChild(colDom.childNodes[c]);
+            }
+          }
+          this._templateInstance._rootDataHost = this;
+          this.templatize(this.$.headerTpl);
+          var headerNode = this.stamp({});
+          colDom.appendChild(headerNode.root);
+        }
+      },
+      _alignmentChanged: function() {
+        this._checkHeader();
+        this.style['text-align'] = this.alignment;
+      },
+      _checkHeader: function() {
+        if (this._isHeader === undefined) {
+          this._isHeader = this._templateInstance._config.isHeader;
+          this._isHeader = this._isHeader || false;
+        }
+      },
+      _forwardParentProp: function(prop, value) {
+        this._getColumnHeader()._templateInstance[prop] = value;
+      },
+      _getColumnHeader: function() {
+        return this.querySelectorAll('.col-header')[0];
+      },
+      _sortHandler: function(e) {
+        if (e.model.__data__.sortable !== true) {
+          return;
+        }
+        if (this._sortDirection !== null) {
+          if (this._sortDirection === 'asc') {
+            this._sortDirection = 'desc';
+          } else {
+            this._sortDirection = 'asc';
+          }
+        } else {
+          this._sortDirection = 'asc';
+        }
+        this.fire('sort', {id:this.id, direction:this._sortDirection});
+      },
+      _sortChanged: function(e) {
+        if (e.detail.id !== this.id && this._sortDirection !== null) {
+          this._sortDirection = null;
+        }
+      },
+      _computeHeaderStyle: function(w) {
+        if (w !== null && w !== '' && w !== '*') {
+          return 'min-width: ' + w;
+        } else {
+          return '';
+        }
+      },
+      _computeHeaderClass: function(w, s) {
+        var classes = 'col-header';
+        if (w === null || w === '' || w === '*') {
+          classes = classes + ' flex';
+        }
+        if (s !== null) {
+          classes += ' sort-' + s;
+        }
+        return classes;
+      },
+      _modelChanged: function() {
+        if (this._model.selected === true) {
+          this.toggleClass('selected', true);
+        } else {
+          this.toggleClass('selected', false);
+        }
+      },
+      attached:function() {
+        if (this._isHeader) {
+          this.domHost.addEventListener('sort', this._sortChanged.bind(this));
+        } else {
+          this._model = this.dataHost.row;
+        }
+      }
+    });
+  })();
+</script>

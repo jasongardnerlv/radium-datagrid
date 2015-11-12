@@ -1,0 +1,369 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/classes/iron-flex-layout.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-dropdown/iron-dropdown.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="paper-datagrid-column.html">
+
+<!--
+Material Design inspired data grid component
+
+@demo demo/index.html
+@demo demo/index2.html
+@demo demo/index3.html
+-->
+<dom-module id="paper-datagrid">
+  <style is="custom-style">
+    :host {
+      -moz-user-select     : none;
+      -khtml-user-select   : none;
+      -webkit-user-select  : none;
+      -o-user-select       : none;
+      user-select          : none;
+    }
+    #dgheader {
+      height: 56px;
+      white-space: nowrap;
+    }
+    #dgheader ::content > paper-datagrid-column{
+      line-height: 56px;
+    }
+    :host ::content .row paper-datagrid-column:first-of-type {
+      padding-left: 24px;
+    }
+    :host ::content .row paper-datagrid-column:last-of-type {
+      padding-right: 24px;
+    }
+    :host ::content .hztl-lines paper-datagrid-column {
+      border-bottom-style: solid;
+      border-bottom-width: 1px;
+      border-bottom-color: var(--grid-line-color,#DDDDDD);
+    }
+    :host ::content .vert-lines paper-datagrid-column {
+      border-right-style: solid;
+      border-right-width: 1px;
+      border-right-color: var(--grid-line-color,#DDDDDD);
+    }
+    :host ::content .vert-lines paper-datagrid-column:last-of-type {
+      border-right: none;
+    }
+    #dgfooter {
+      height: 56px;
+      padding: 0px 6px;
+      font-size: 12px;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 0.54);
+    }
+    #dgfooter > paper-icon-button {
+      margin: 0px 2px;
+    }
+    #pages {
+      margin-left: 32px;
+      margin-right: 32px;
+    }
+    #perPageArrow {
+      padding: 0px;
+      width: 24px;
+      height: 24px;
+    }
+    #perPage {
+      text-align: right;
+      width: 40px;
+    }
+    #optionsDropdown paper-item {
+      color: #666666;
+      cursor: pointer;
+      background-color: #FFFFFF;
+    }
+    #optionsDropdown paper-item:hover {
+      color: #000000;
+      background-color: #EEEEEE;
+    }
+    #optionsDropdown paper-item.iron-selected {
+      font-weight: initial;
+    }
+  </style>
+  <template>
+    <array-selector id="selector" items="{{items}}"
+      selected="{{selectedItems}}" selected-item="{{selectedItem}}">
+    </array-selector>
+    <div style="overflow:auto">
+      <div id="dgheader" class="header row center horizontal layout"></div>
+      <div id="dggrid"></div>
+      <template is="dom-if" if="[[enablePaging]]">
+        <div id="dgfooter" class="center horizontal-reverse layout">
+          <paper-icon-button icon="chevron-right" on-click="_nextPage"></paper-icon-button>
+          <paper-icon-button icon="chevron-left" on-click="_prevPage"></paper-icon-button>
+          <span id="pages">[[_calcPaging(currentPage,itemsPerPage,totalItems,pageCountLabel)]]</span>
+          <div>
+            <paper-icon-button id="perPageArrow" icon="arrow-drop-down" noink on-click="_showPageOpts"></paper-icon-button>
+            <iron-dropdown id="optionsDropdown" horizontal-align="right" vertical-align="bottom">
+              <paper-material class="dropdown-content">
+                <div class="options">
+                  <template is="dom-repeat" items="[[perPageOptions]]">
+                    <paper-item on-click="_optHandler">[[item]]</paper-item>
+                  </template>
+                </div>
+              </paper-material>
+            </iron-dropdown>
+          </div>
+          <span id="perPage">[[itemsPerPage]]</span>
+          <span>[[perPageLabel]]</span>
+        </div>
+      </template>
+    </div>
+    <content id="template" select="template"></content>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'paper-datagrid',
+      properties: {
+        items: {
+          type: Array,
+          value: function(){return [];}
+        },
+        contentHeight: {
+          type: Number,
+          value: -1
+        },
+        gridLines: {
+          type: String,
+          value: 'horizontal'
+        },
+        enablePaging: {
+          type: Boolean,
+          value: false
+        },
+        currentPage: {
+          type: Number,
+          value: 1
+        },
+        itemsPerPage: {
+          type: Number,
+          value: 10
+        },
+        totalItems: {
+          type: Number,
+          value: 0
+        },
+        perPageOptions: {
+          type: Array,
+          value: function() { return []; }
+        },
+        pageCountLabel: {
+          type: String,
+          value: '{1}-{2} of {3}'
+        },
+        perPageLabel: {
+          type: String,
+          value: 'Rows per page:'
+        },
+        selectionEnabled: {
+          type: Boolean,
+          value: false
+        },
+        selectedItem: {
+          type: Object,
+          notify: true
+        },
+        selectedItems: {
+          type: Object,
+          notify: true
+        },
+        multiSelection: {
+          type: Boolean,
+          value: false
+        },
+        desktopMultiSelection: {
+          type: Boolean,
+          value: false
+        }
+      },
+      behaviors: [Polymer.Templatizer],
+      observers: [
+        '_itemsChanged(items.*)',
+        '_selectionEnabledChanged(selectionEnabled)',
+        '_multiSelectionChanged(multiSelection)',
+        '_contentHeightChanged(contentHeight)',
+        '_gridLinesChanged(gridLines)'
+      ],
+      _itemsChanged: function(change) {
+        if (change.path === 'items' || change.path === 'items.splices') {
+          var template = Polymer.dom(this.$.template).getDistributedNodes()[0];
+          this.templatize(template);
+          var headerDom = Polymer.dom(this.$.dgheader);
+          if (headerDom.childNodes.length === 0) {
+            headerDom.appendChild(this.stamp({isHeader:true}).root);
+          }
+          //TODO: brute force right now, need to improve
+          var gridDom = Polymer.dom(this.$.dggrid);
+          for (var c = gridDom.childNodes.length - 1; c >= 0; c--) {
+            var child = gridDom.childNodes[c];
+            if (child.className.indexOf('header') < 0) {
+              gridDom.removeChild(child);
+            }
+          }
+          for (var i = 0; i < this.items.length; i++) {
+            var itemNode = this.stamp({});
+            itemNode.row = this.items[i];
+            var row = document.createElement('div');
+            row.className += 'row center horizontal layout';
+            row.appendChild(itemNode.root);
+            gridDom.appendChild(row);
+          }
+        } else if (change.path.indexOf('items.#') === 0) {
+          var idx = change.path.substr(7);
+          idx = parseInt(idx.substring(0, idx.indexOf('.')));
+          var gridRow = this.$.dggrid.childNodes[idx];
+          for (var c = gridRow.childNodes.length - 1; c >= 0; c--) {
+            var child = gridRow.childNodes[c];
+            if (child.nodeType === 1) {
+              //TODO: figure out the right way to do this
+              child.dataHost.row = {};
+              child.dataHost.row = this.items[idx];
+              child._model = {};
+              child._model = this.items[idx];
+            }
+          }
+        }
+      },
+      _selectionEnabledChanged: function(selectionEnabled) {
+        if (selectionEnabled) {
+          this.listen(this, 'tap', '_selectionHandler');
+          this.listen(this, 'keypress', '_selectionHandler');
+        } else {
+          this.unlisten(this, 'tap', '_selectionHandler');
+          this.unlisten(this, 'keypress', '_selectionHandler');
+        }
+        this.clearSelection();
+      },
+      _selectionHandler: function(e) {
+        if (e.type !== 'keypress' || e.keyCode === 13) {
+          var model = this.modelForElement(e.target);
+          if (model) {
+            if (!this.desktopMultiSelection) {
+              this.toggleSelectionForItem(model.row);
+            } else {
+              this._desktopMultiSelect(e.detail.sourceEvent, model.row);
+            }
+          }
+        }
+      },
+      _multiSelectionChanged: function(multiSelection) {
+        this.clearSelection();
+        this.$.selector.multi = multiSelection;
+      },
+      _contentHeightChanged: function() {
+        if (!isNaN(this.contentHeight) && this.contentHeight > 0) {
+          this.$.dggrid.style.height = this.contentHeight + 'px';
+          this.$.dggrid.style['overflow-y'] = 'auto';
+        } else {
+          this.$.dggrid.style.height = '';
+          this.$.dggrid.style['overflow-y'] = 'initial';
+        }
+      },
+      _gridLinesChanged: function() {
+        this._updateGridLines(this.$.dgheader);
+        this._updateGridLines(this.$.dggrid);
+      },
+      _updateGridLines: function(div) {
+        this.toggleClass('hztl-lines', false, div);
+        this.toggleClass('vert-lines', false, div);
+        if (this.gridLines.toLowerCase() === 'horizontal' || this.gridLines.toLowerCase() === 'both') {
+          this.toggleClass('hztl-lines', true, div);
+        }
+        if (this.gridLines.toLowerCase() === 'vertical' || this.gridLines.toLowerCase() === 'both') {
+          this.toggleClass('vert-lines', true, div);
+        }
+      },
+      _forwardParentProp: function(prop, value) {
+        if (prop !== 'row') {
+          var columns = this.querySelectorAll('paper-datagrid-column');
+          for (var i = 0; i < columns.length; i++) {
+            columns[i]._templateInstance[prop] = value;
+          }
+        }
+      },
+      _calcPaging: function(cp, pp, ttl, pcl) {
+        var sIdx = ((cp - 1) * pp) + 1;
+        var eIdx = (sIdx + pp) - 1;
+        eIdx = (eIdx < ttl) ? eIdx : ttl;
+        var args = [null,sIdx,eIdx,ttl];
+        return pcl.replace(/{(\d+)}/g, function(match, number) {
+          return typeof args[number] != 'undefined' ? args[number] : match;
+        });
+      },
+      _optHandler: function(e) {
+        this.$$('#optionsDropdown').close();
+        this.fire('per-page-change', e.model.__data__.item)
+      },
+      _nextPage: function(e) {
+        this.fire('next-page');
+      },
+      _prevPage: function(e) {
+        this.fire('prev-page');
+      },
+      _showPageOpts: function(e) {
+        var dd = this.$$('#optionsDropdown');
+        if (dd.opened) { return; }
+        dd.open();
+      },
+      clearSelection: function() {
+        if (Array.isArray(this.selectedItems)) {
+          for (var i = this.selectedItems.length - 1; i >= 0; i--) {
+            this.deselectItem(this.selectedItems[i]);
+          }
+        } else if (this.selectedItem) {
+          this.deselectItem(this.selectedItem);
+        }
+      },
+      selectItem: function(item) {
+        if (!this.multiSelection && this.selectedItem) {
+          this.deselectItem(this.selectedItem);
+        }
+        var idx = this.items.indexOf(item);
+        this.set('items.' + idx + '.selected', true);
+        this.$.selector.select(item);
+      },
+      deselectItem: function(item) {
+        var idx = this.items.indexOf(item);
+        this.set('items.' + idx + '.selected', false);
+        this.$.selector.deselect(item);
+      },
+      toggleSelectionForItem: function(item) {
+        if (this.$.selector.isSelected(item)) {
+          this.deselectItem(item);
+        } else {
+          this.selectItem(item);
+        }
+      },
+      _desktopMultiSelect: function(evt, item) {
+        if (this.multiSelection) {
+          if (evt.ctrlKey === false && evt.metaKey === false && evt.shiftKey === false) {
+            this.clearSelection();
+          }
+          var idx = this.items.indexOf(item);
+          if (evt.shiftKey === true) {
+            if (!isNaN(this._lastSelectedIndex)) {
+              var smaller = (idx < this._lastSelectedIndex) ? idx : this._lastSelectedIndex;
+              var bigger = (idx < this._lastSelectedIndex) ? this._lastSelectedIndex : idx;
+              for (var i = smaller; i <= bigger; i++) {
+                this.selectItem(this.items[i]);
+              }
+            }
+          } else {
+            this.toggleSelectionForItem(item);
+          }
+          this._lastSelectedIndex = idx;
+        } else {
+          this.toggleSelectionForItem(item);
+        }
+      }
+    });
+  })();
+</script>
