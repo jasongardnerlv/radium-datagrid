@@ -219,6 +219,7 @@ Material Design inspired data grid component
             var row = document.createElement('div');
             row.className += 'row center horizontal layout';
             row.appendChild(itemNode.root);
+            row.addEventListener('dblclick', this._rowDblClick.bind(this));
             gridDom.appendChild(row);
           }
         } else if (change.path.indexOf('items.#') === 0) {
@@ -259,6 +260,28 @@ Material Design inspired data grid component
           }
         }
       },
+      _desktopMultiSelect: function(evt, item) {
+        if (this.multiSelection) {
+          if (evt.ctrlKey === false && evt.metaKey === false && evt.shiftKey === false) {
+            this.clearSelection();
+          }
+          var idx = this.items.indexOf(item);
+          if (evt.shiftKey === true) {
+            if (!isNaN(this._lastSelectedIndex)) {
+              var smaller = (idx < this._lastSelectedIndex) ? idx : this._lastSelectedIndex;
+              var bigger = (idx < this._lastSelectedIndex) ? this._lastSelectedIndex : idx;
+              for (var i = smaller; i <= bigger; i++) {
+                this.selectItem(this.items[i]);
+              }
+            }
+          } else {
+            this.toggleSelectionForItem(item);
+          }
+          this._lastSelectedIndex = idx;
+        } else {
+          this.toggleSelectionForItem(item);
+        }
+      },
       _multiSelectionChanged: function(multiSelection) {
         this.clearSelection();
         this.$.selector.multi = multiSelection;
@@ -285,6 +308,18 @@ Material Design inspired data grid component
         if (this.gridLines.toLowerCase() === 'vertical' || this.gridLines.toLowerCase() === 'both') {
           this.toggleClass('vert-lines', true, div);
         }
+      },
+      _rowDblClick: function(e) {
+        var col;
+        var el = e.target;
+        while (col === undefined) {
+          if (el.nodeName.toLowerCase() === 'paper-datagrid-column') {
+            col = el
+          } else {
+            el = el.parentNode;
+          }
+        }
+        this.fire('row-dblclick', this.modelForElement(col).row);
       },
       _forwardParentProp: function(prop, value) {
         if (prop !== 'row') {
@@ -345,28 +380,6 @@ Material Design inspired data grid component
           this.deselectItem(item);
         } else {
           this.selectItem(item);
-        }
-      },
-      _desktopMultiSelect: function(evt, item) {
-        if (this.multiSelection) {
-          if (evt.ctrlKey === false && evt.metaKey === false && evt.shiftKey === false) {
-            this.clearSelection();
-          }
-          var idx = this.items.indexOf(item);
-          if (evt.shiftKey === true) {
-            if (!isNaN(this._lastSelectedIndex)) {
-              var smaller = (idx < this._lastSelectedIndex) ? idx : this._lastSelectedIndex;
-              var bigger = (idx < this._lastSelectedIndex) ? this._lastSelectedIndex : idx;
-              for (var i = smaller; i <= bigger; i++) {
-                this.selectItem(this.items[i]);
-              }
-            }
-          } else {
-            this.toggleSelectionForItem(item);
-          }
-          this._lastSelectedIndex = idx;
-        } else {
-          this.toggleSelectionForItem(item);
         }
       }
     });
