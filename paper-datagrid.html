@@ -24,6 +24,10 @@ Material Design inspired data grid component
       -o-user-select       : none;
       user-select          : none;
     }
+    #dgwrapper {
+      overflow: auto;
+      height: 100%;
+    }
     #dgheader {
       height: 56px;
       white-space: nowrap;
@@ -60,6 +64,7 @@ Material Design inspired data grid component
       font-size: 12px;
       font-weight: 400;
       color: rgba(0, 0, 0, 0.54);
+      border-top: solid 1px #DDDDDD;
     }
     #dgfooter > paper-icon-button {
       margin: 0px 2px;
@@ -94,7 +99,7 @@ Material Design inspired data grid component
     <array-selector id="selector" items="{{items}}"
       selected="{{selectedItems}}" selected-item="{{selectedItem}}">
     </array-selector>
-    <div style="overflow:auto">
+    <div id="dgwrapper">
       <div id="dgheader" class="header row center horizontal layout"></div>
       <div id="dggrid"></div>
       <template is="dom-if" if="[[enablePaging]]">
@@ -130,10 +135,6 @@ Material Design inspired data grid component
         items: {
           type: Array,
           value: function(){return [];}
-        },
-        contentHeight: {
-          type: Number,
-          value: -1
         },
         gridLines: {
           type: String,
@@ -187,14 +188,18 @@ Material Design inspired data grid component
         desktopMultiSelection: {
           type: Boolean,
           value: false
-        }
+        },
+        fixedHeaderFooter: {
+          type: Boolean,
+          value: false
+        },
       },
       behaviors: [Polymer.Templatizer],
       observers: [
         '_itemsChanged(items.*)',
         '_selectionEnabledChanged(selectionEnabled)',
         '_multiSelectionChanged(multiSelection)',
-        '_contentHeightChanged(contentHeight)',
+        '_fixedHeaderFooterChanged(fixedHeaderFooter)',
         '_gridLinesChanged(gridLines)'
       ],
       _itemsChanged: function(change) {
@@ -286,13 +291,20 @@ Material Design inspired data grid component
         this.clearSelection();
         this.$.selector.multi = multiSelection;
       },
-      _contentHeightChanged: function() {
-        if (!isNaN(this.contentHeight) && this.contentHeight > 0) {
-          this.$.dggrid.style.height = this.contentHeight + 'px';
+      _fixedHeaderFooterChanged: function() {
+        if (this.fixedHeaderFooter === true) {
+          //TODO get these values from css
+          var hfHeight = '56px';
+          if (this.enablePaging === true) {
+            hfHeight = '112px';
+          }
+          this.$.dggrid.style.height = 'calc(100% - ' + hfHeight + ')';
           this.$.dggrid.style['overflow-y'] = 'auto';
+          this.$.dgwrapper.style['overflow-y'] = 'hidden';
         } else {
           this.$.dggrid.style.height = '';
           this.$.dggrid.style['overflow-y'] = 'initial';
+          this.$.dgwrapper.style['overflow-y'] = 'auto';
         }
       },
       _gridLinesChanged: function() {

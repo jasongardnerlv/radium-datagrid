@@ -35,7 +35,7 @@
       <div id="gridExample">
         <paper-datagrid id="grid" items="[[_appliedItems]]" enable-paging="[[_pagingEnabled]]" items-per-page="[[_rowsPerPage]]"
         per-page-options="[[_pageOptions]]" current-page="[[_currentPage]]" total-items="[[_getTotalCount(_initialItems)]]"
-        on-next-page="_nextPage" on-prev-page="_prevPage" on-per-page-change="_pageSizeChanged" content-height="[[_contentHeight]]">
+        on-next-page="_nextPage" on-prev-page="_prevPage" on-per-page-change="_pageSizeChanged">
           <template>
             <paper-datagrid-column id="icon" alignment="center" column-width="40px"><iron-icon icon="[[row.icon]]"></iron-icon></paper-datagrid-column>
             <paper-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></paper-datagrid-column>
@@ -46,12 +46,10 @@
       </div>
       <div class="vertical layout">
         <paper-button class="demo-button" raised on-click="_togglePaging">Paging Enabled: <span>[[_pagingEnabled]]</span></paper-button>
-        <paper-button class="demo-button" raised on-click="_toggleContentHeight">Content Height: <span>[[_contentHeight]]</span></paper-button>
       </div>
     </div>
   </template>
   <script>
-      app._contentHeight = -1;
       app._pagingEnabled = true;
       app._currentPage = 1;
       app._rowsPerPage = 10;
@@ -101,13 +99,6 @@
       };
       app._togglePaging = function() {
         app._pagingEnabled = !app._pagingEnabled;
-      };
-      app._toggleContentHeight = function() {
-        if (app._contentHeight === -1) {
-          app._contentHeight = 300;
-        } else {
-          app._contentHeight = -1;
-        }
       };
       app._initialItems = app._genFakeData();
       app._refreshData();
