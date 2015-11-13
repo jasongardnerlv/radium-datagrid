@@ -121,7 +121,7 @@
         '_widthChanged(columnWidth)',
         '_headerChanged(header)',
         '_alignmentChanged(alignment)',
-        '_modelChanged(_model)'
+        '_modelChanged(_model.*)'
       ],
       _widthChanged: function() {
         this._checkHeader();
@@ -213,7 +213,7 @@
         return classes;
       },
       _modelChanged: function() {
-        if (this._model.selected === true) {
+        if (this._model && this._model.selected === true) {
           this.toggleClass('selected', true);
         } else {
           this.toggleClass('selected', false);

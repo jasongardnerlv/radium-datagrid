@@ -228,14 +228,16 @@ Material Design inspired data grid component
             gridDom.appendChild(row);
           }
         } else if (change.path.indexOf('items.#') === 0) {
-          var idx = change.path.substr(7);
-          idx = parseInt(idx.substring(0, idx.indexOf('.')));
-          var gridRow = this.$.dggrid.childNodes[idx];
+          var path = change.path.substr(7);
+          var subpathIdx = path.indexOf('.');
+          var itemIdx = parseInt(path.substring(0, subpathIdx));
+          var path = path.substr(subpathIdx + 1);
+          var gridRow = this.$.dggrid.childNodes[itemIdx];
           for (var c = gridRow.childNodes.length - 1; c >= 0; c--) {
             var child = gridRow.childNodes[c];
             if (child.nodeType === 1) {
-              child._model = {};
-              child._model = this.items[idx];
+              child.dataHost.set('row.' + path, change.value);
+              child.set('_model.' + path, change.value);
             }
           }
         }
