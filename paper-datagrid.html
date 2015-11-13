@@ -234,9 +234,6 @@ Material Design inspired data grid component
           for (var c = gridRow.childNodes.length - 1; c >= 0; c--) {
             var child = gridRow.childNodes[c];
             if (child.nodeType === 1) {
-              //TODO: figure out the right way to do this
-              child.dataHost.row = {};
-              child.dataHost.row = this.items[idx];
               child._model = {};
               child._model = this.items[idx];
             }
