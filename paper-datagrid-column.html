@@ -17,49 +17,50 @@
       color: rgba(0, 0, 0, 0.87);
       font-weight: 400;
     }
-    #dgcolumn > ::content .col-header {
+    #dgcolumn > ::content #colHeader {
       font-size: 12px;
       color: rgba(0, 0, 0, 0.54);
       font-weight: 400;
     }
-    #dgcolumn > ::content .col-header[data-sortable] {
+    #dgcolumn > ::content #colHeader[data-sortable] {
       cursor: pointer;
     }
-    #dgcolumn > ::content .col-header > iron-icon {
+    #dgcolumn > ::content #colHeader > iron-icon {
       margin-right: 4px;
       pointer-events: none;
       display: none;
       width: 16px;
       height: 16px;
     }
-    #dgcolumn > ::content .col-header:hover > iron-icon {
+    #dgcolumn > ::content #colHeader:hover > iron-icon {
       display: inline-block;
       -ms-transform: rotate(-90deg);
       -webkit-transform: rotate(-90deg);
       transform: rotate(-90deg);
       color: rgba(0, 0, 0, 0.26);
     }
-    #dgcolumn > ::content .col-header > div {
+    #dgcolumn > ::content #colHeader > div {
       pointer-events: none;
       display: inline-block;
+      height: 56px;
     }
-    #dgcolumn > ::content .col-header:not([data-sortable]) > iron-icon {
+    #dgcolumn > ::content #colHeader:not([data-sortable]) > iron-icon {
       display: none;
     }
-    #dgcolumn > ::content .col-header.sort-asc {
+    #dgcolumn > ::content #colHeader.sort-asc {
       color: rgba(0, 0, 0, 0.87);
     }
-    #dgcolumn > ::content .col-header.sort-asc > iron-icon {
+    #dgcolumn > ::content #colHeader.sort-asc > iron-icon {
       -ms-transform: rotate(-90deg);
       -webkit-transform: rotate(-90deg);
       transform: rotate(-90deg);
       display: inline-block;
       color: rgba(0, 0, 0, 0.87);
     }
-    #dgcolumn > ::content .col-header.sort-desc {
+    #dgcolumn > ::content #colHeader.sort-desc {
       color: rgba(0, 0, 0, 0.87);
     }
-    #dgcolumn > ::content .col-header.sort-desc > iron-icon {
+    #dgcolumn > ::content #colHeader.sort-desc > iron-icon {
       -ms-transform: rotate(90deg);
       -webkit-transform: rotate(90deg);
       transform: rotate(90deg);
@@ -72,8 +73,8 @@
       <content></content>
     </div>
     <template id="headerTpl">
-      <div data-id$="[[id]]" data-sortable$="[[sortable]]" on-click="_sortHandler"
-          style$="[[_computeHeaderStyle(columnWidth)]]" class$="[[_computeHeaderClass(columnWidth, _sortDirection)]]">
+      <div id="colHeader" data-id$="[[id]]" data-sortable$="[[sortable]]" on-click="_sortHandler"
+          style$="[[_computeHeaderStyle(columnWidth)]]" class$="[[_computeHeaderClass(columnWidth, alignment, _sortDirection)]]">
         <iron-icon icon="arrow-forward"></iron-icon>
         <div>[[header]]</div>
       </div>
@@ -148,7 +149,6 @@
         }
       },
       _alignmentChanged: function() {
-        this._checkHeader();
         this.style['text-align'] = this.alignment;
       },
       _checkHeader: function() {
@@ -161,7 +161,7 @@
         this._getColumnHeader()._templateInstance[prop] = value;
       },
       _getColumnHeader: function() {
-        return this.querySelectorAll('.col-header')[0];
+        return this.querySelectorAll('#colHeader')[0];
       },
       _sortHandler: function(e) {
         if (e.model.__data__.sortable !== true) {
@@ -190,8 +190,20 @@
           return '';
         }
       },
-      _computeHeaderClass: function(w, s) {
-        var classes = 'col-header';
+      _computeHeaderClass: function(w, a, s) {
+        var classes = '';
+        switch (a) {
+          case 'center':
+            classes = classes + 'center-justified';
+            break;
+          case 'right':
+            classes = classes + 'end-justified';
+            break;
+          default:
+            classes = classes + 'start-justified';
+            break;
+        }
+        classes = classes + ' center horizontal layout';
         if (w === null || w === '' || w === '*') {
           classes = classes + ' flex';
         }
