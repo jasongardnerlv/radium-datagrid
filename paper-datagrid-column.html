@@ -136,6 +136,7 @@
           this.toggleClass('flex', true);
         } else {
           this.style['min-width'] = this.columnWidth;
+          this.style['max-width'] = this.columnWidth;
         }
         this._computeHeaderClasses();
         this._computeHeaderStyle();
@@ -201,7 +202,7 @@
       },
       _computeHeaderStyle: function(w) {
         if (w !== null && w !== '' && w !== '*') {
-          this._headerStyle = 'min-width: ' + w;
+          this._headerStyle = 'min-width: ' + w + ';max-width: ' + w ;
         } else {
           this._headerStyle = '';
         }
