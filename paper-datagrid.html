@@ -42,11 +42,16 @@ Material Design inspired data grid component
     :host([selection-enabled]) ::content .row.header:hover {
       background-color: initial;
     }
-    :host ::content .row paper-datagrid-column:first-of-type {
-      padding-left: 24px;
+    :host ::content .row paper-datagrid-column:first-of-type .splitter {
+      display: none;
     }
-    :host ::content .row paper-datagrid-column:last-of-type {
-      padding-right: 24px;
+    :host ::content .row paper-datagrid-column:first-of-type #dgcolumn {
+      margin-left: 24px;
+      width: calc(100% - 36px);
+    }
+    :host ::content .row paper-datagrid-column:last-of-type #dgcolumn {
+      margin-right: 24px;
+      width: calc(100% - 36px);
     }
     :host ::content .hztl-lines paper-datagrid-column {
       border-bottom-style: solid;
