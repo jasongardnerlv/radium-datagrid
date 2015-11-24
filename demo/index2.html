@@ -37,7 +37,7 @@
         per-page-options="[[_pageOptions]]" current-page="[[_currentPage]]" total-items="[[_getTotalCount(_initialItems)]]"
         on-next-page="_nextPage" on-prev-page="_prevPage" on-per-page-change="_pageSizeChanged">
           <template>
-            <paper-datagrid-column id="icon" alignment="center" column-width="40px"><iron-icon icon="[[row.icon]]"></iron-icon></paper-datagrid-column>
+            <paper-datagrid-column id="icon" column-width="72px"><iron-icon icon="[[row.icon]]"></iron-icon></paper-datagrid-column>
             <paper-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></paper-datagrid-column>
             <paper-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></paper-datagrid-column>
             <paper-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></paper-datagrid-column>
