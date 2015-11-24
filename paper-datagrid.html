@@ -340,6 +340,33 @@ Material Design inspired data grid component
         }
         this.fire('row-dblclick', this.modelForElement(col).row);
       },
+      _resizeCell: function(cell, width) {
+        cell.style['min-width'] = width;
+        cell.style['max-width'] = width;
+        cell.style.flex = 'initial';
+      },
+      _resizeColumns: function(row, idx, delta) {
+        var minColWidth = 48;
+        var col = row.children[idx];
+        var colWidth = document.defaultView.getComputedStyle(col, '').getPropertyValue('width');
+        var newColWidth = (parseInt(colWidth, 10) - delta);
+        var prev = row.children[idx - 1];
+        var prevWidth = document.defaultView.getComputedStyle(prev, '').getPropertyValue('width');
+        var newPrevWidth = (parseInt(prevWidth, 10) + delta);
+        if (newColWidth > minColWidth && newPrevWidth > minColWidth) {
+          this._resizeCell(col, newColWidth + 'px');
+          this._resizeCell(prev, newPrevWidth + 'px');
+        }
+      },
+      _columnResize: function(e) {
+        var idx = e.detail.idx;
+        var delta = e.detail.delta;
+        this._resizeColumns(this.$.dgheader, idx, delta);
+        var rows = Polymer.dom(this.$.dggrid).children;
+        for (var i = 0; i < rows.length; i++) {
+          this._resizeColumns(rows[i], idx, delta);
+        }
+      },
       _forwardParentProp: function(prop, value) {
         if (prop !== 'row') {
           var columns = this.querySelectorAll('paper-datagrid-column');
@@ -400,6 +427,9 @@ Material Design inspired data grid component
         } else {
           this.selectItem(item);
         }
+      },
+      ready: function() {
+        this.$.dgwrapper.addEventListener('column-resize', this._columnResize.bind(this));
       }
     });
   })();
