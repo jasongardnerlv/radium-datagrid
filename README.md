@@ -7,5 +7,4 @@
 * Links to demos
 * Travis build
 * Features
-  * Column resizing (p1)
-  * Infinite scroll (p2)
+  * Infinite scroll (p1)
