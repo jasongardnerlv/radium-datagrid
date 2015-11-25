@@ -14,6 +14,7 @@ Material Design inspired data grid component
 @demo demo/index.html
 @demo demo/index2.html
 @demo demo/index3.html
+@demo demo/index4.html
 -->
 <dom-module id="paper-datagrid">
   <style is="custom-style">
@@ -306,7 +307,7 @@ Material Design inspired data grid component
             hfHeight = '112px';
           }
           this.$.dggrid.style.height = 'calc(100% - ' + hfHeight + ')';
-          this.$.dggrid.style['overflow-y'] = 'auto';
+          this.$.dggrid.style['overflow-y'] = 'overlay';
           this.$.dgwrapper.style['overflow-y'] = 'hidden';
         } else {
           this.$.dggrid.style.height = '';
