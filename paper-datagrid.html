@@ -11,6 +11,26 @@
 <!--
 Material Design inspired data grid component
 
+This element uses, as an initial foundation, the Google Material Design specification for data tables:
+[Data Tables](https://www.google.com/design/spec/components/data-tables.html)
+
+However, the goal of the element is to support much richer _data grid_ functionality, so there will be necessary
+deviations or extrapolations, as features that are not included in the specification are added to this element.
+
+### Simple Example:
+
+    <paper-datagrid items="[[_myItems]]">
+      <template>
+        <paper-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></paper-datagrid-column>
+        <paper-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></paper-datagrid-column>
+        <paper-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></paper-datagrid-column>
+      </template>
+    </paper-datagrid>
+
+A row will be rendered for each item of the collection, and the _row_ property will be available for the template of each
+column.
+
+@element paper-datagrid
 @demo demo/index.html Basic configurations
 @demo demo/index2.html Paging footer
 @demo demo/index3.html Item selection
@@ -171,64 +191,152 @@ Material Design inspired data grid component
   (function() {
     Polymer({
       is: 'paper-datagrid',
+
+      /*
+       * A column is being sorted
+       *
+       * @event sort
+       */
+
+      /*
+       * A row was double-clicked
+       *
+       * @event row-dblclick
+       */
+
+      /*
+       * A new page size was selected
+       *
+       * @event per-page-change
+       */
+
+      /*
+       * The user desires to navigate to the next page
+       *
+       * @event next-page
+       */
+
+      /*
+       * The user desires to navigate to the previous page
+       *
+       * @event prev-page
+       */
+
+      /*
+       * When infinite scrolling is enabled, this indicates the need to fetch more data
+       *
+       * @event scroll-more
+       */
+
       properties: {
+        /**
+         * An array containing the objects that will correspond to each row of the grid
+         */
         items: {
           type: Array,
           value: function(){return [];}
         },
+        /**
+         * Which row/column border lines to draw - _horizontal_, _vertical_, or _both_
+         */
         gridLines: {
           type: String,
           value: 'horizontal'
         },
+        /**
+         * Whether or not activate and display the paging footer controls
+         */
         enablePaging: {
           type: Boolean,
           value: false
         },
+        /**
+         * Current page displayed, when paging
+         */
         currentPage: {
           type: Number,
           value: 1
         },
+        /**
+         * Number of items shown per page, when paging
+         */
         itemsPerPage: {
           type: Number,
           value: 10
         },
+        /**
+         * Total number of items available, when paging
+         */
         totalItems: {
           type: Number,
           value: 0
         },
+        /**
+         * Page sizes avilable for the user to choose from, when paging
+         */
         perPageOptions: {
           type: Array,
           value: function() { return []; }
         },
+        /**
+         * Label to use for indicating the page information, when paging.  Allows for language translation, providing
+         * value substitution - `{1}-{2} of {3}`
+         */
         pageCountLabel: {
           type: String,
           value: '{1}-{2} of {3}'
         },
+        /**
+         * Label to use for the page options dropdown, when paging.  Allows for language translation
+         */
         perPageLabel: {
           type: String,
           value: 'Rows per page:'
         },
+        /**
+         * Whether or not row selection is enabled
+         */
         selectionEnabled: {
           type: Boolean,
           value: false,
           reflectToAttribute: true
         },
+        /**
+         * When `multiSelection` is false, this is the currently selected item, or `null`
+         * if no item is selected.
+         */
         selectedItem: {
           type: Object,
           notify: true
         },
+        /**
+         * When `multiSelection` is true, this is an array that contains the selected items.
+         */
         selectedItems: {
           type: Object,
           notify: true
         },
+        /**
+         * Whether or not row multi selection is enabled
+         */
         multiSelection: {
           type: Boolean,
           value: false
         },
+        /**
+         * Whether or not _desktop like_ row multi selection is enabled.  By default, multi-selection will behave in a
+         * manner that is useful for both mobile and desktop scenarios, i.e. each click will select/deselect a given
+         * row, and keyboard combinations like _ctrl+click_ and _shift+click_ have no effect.  With
+         * `desktop-multii-selection`, these keyboard combinations are supported.
+         */
         desktopMultiSelection: {
           type: Boolean,
           value: false
         },
+        /**
+         * Whether or not to keep the header and footer (if paging is enabled) from scrolling with the grid rows.  This
+         * requires that the datagrid has an explicit height declared.
+         */
         fixedHeaderFooter: {
           type: Boolean,
           value: false
@@ -460,6 +568,11 @@ Material Design inspired data grid component
         }
         this._infiniteScrolling = false;
       },
+      /**
+       * Clear any currently selected rows
+       *
+       * @method clearSelection
+       */
       clearSelection: function() {
         if (Array.isArray(this.selectedItems)) {
           for (var i = this.selectedItems.length - 1; i >= 0; i--) {
@@ -469,6 +582,12 @@ Material Design inspired data grid component
           this.deselectItem(this.selectedItem);
         }
       },
+      /**
+       * Select the row that corresponds to the provided item
+       *
+       * @method selectItem
+       * @param {Object} Item to select
+       */
       selectItem: function(item) {
         if (!this.multiSelection && this.selectedItem) {
           this.deselectItem(this.selectedItem);
@@ -477,11 +596,23 @@ Material Design inspired data grid component
         this.set('items.' + idx + '.selected', true);
         this.$.selector.select(item);
       },
+      /**
+       * Deselect the row that corresponds to the provided item
+       *
+       * @method deselectItem
+       * @param {Object} Item to deselect
+       */
       deselectItem: function(item) {
         var idx = this.items.indexOf(item);
         this.set('items.' + idx + '.selected', false);
         this.$.selector.deselect(item);
       },
+      /**
+       * Select or deselect the row that corresponds to the provided item, depending on its current selected state
+       *
+       * @method toggleSelectionForItem
+       * @param {Object} Item to select/deselect
+       */
       toggleSelectionForItem: function(item) {
         if (this.$.selector.isSelected(item)) {
           this.deselectItem(item);
@@ -489,6 +620,14 @@ Material Design inspired data grid component
           this.selectItem(item);
         }
       },
+      /**
+       * Enable infinite scroll.  The DOM element that is handling scrolling for the grid should be provided as the
+       * parameter. If the grid has a fixed size (such as with a fixed header), the scroller parameter is omitted.
+       * This feature cannot be used in combination with the paging feature.
+       *
+       * @method enableInfiniteScroll
+       * @param {?Element} The element that controls the scroll
+       */
       enableInfiniteScroll: function(scroller) {
         if (scroller !== undefined) {
           this._scroller = scroller;
@@ -498,6 +637,12 @@ Material Design inspired data grid component
         this._scrollListener = this._scrollHandler.bind(this);
         this._scroller.addEventListener('scroll', this._scrollListener);
       },
+      /**
+       * When using the infinite scroll feature, this method can be called during the on-scroll-more handler to indicate
+       * there is no additional data available.
+       *
+       * @method infiniteScrollDone
+       */
       infiniteScrollDone: function() {
         this._hideInfiniteScrollIcon();
       },

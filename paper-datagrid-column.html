@@ -100,22 +100,38 @@
           type:String,
           value: null
         },
+        /**
+         * Id value to use for the column.  Useful for correlating event callbacks like sorting
+         */
         id: {
           type: String,
           value: ''
         },
+        /**
+         * Width of the column. The value can be a fixed value to set directly on the columns css->width (e.g. '100px')
+         * or a '*' can be used to indicate it should use as much width as it can (flexbox flex).
+         */
         columnWidth: {
           type: String,
           value: ''
         },
+        /**
+         * Text to display as the header label of the column
+         */
         header: {
           type: String,
           value: ''
         },
+        /**
+         * How to align content within the column - _left_, _center_, or _right_
+         */
         alignment: {
           type: String,
           value: 'left'
         },
+        /**
+         * Whether or not to enable the column for sorting
+         */
         sortable: {
           type: Boolean,
           value: false
