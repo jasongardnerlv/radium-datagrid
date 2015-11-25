@@ -15,6 +15,8 @@ Material Design inspired data grid component
 @demo demo/index2.html
 @demo demo/index3.html
 @demo demo/index4.html
+@demo demo/index5.html
+@demo demo/index6.html
 -->
 <dom-module id="paper-datagrid">
   <style is="custom-style">
@@ -26,7 +28,7 @@ Material Design inspired data grid component
       user-select          : none;
     }
     #dgwrapper {
-      overflow: auto;
+      overflow-x: auto;
       height: 100%;
     }
     #dgheader {
@@ -103,6 +105,34 @@ Material Design inspired data grid component
     #optionsDropdown paper-item.iron-selected {
       font-weight: initial;
     }
+    #infScrollIcon {
+      height: 56px;
+    }
+    #infScrollIcon iron-icon {
+      color: rgba(0, 0, 0, 0.4);
+      -webkit-animation: icon-spin 1s infinite linear;
+      animation: icon-spin 1s infinite linear;
+    }
+    @-webkit-keyframes icon-spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+      }
+    }
+    @keyframes icon-spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+      }
+    }
   </style>
   <template>
     <array-selector id="selector" items="{{items}}"
@@ -132,6 +162,7 @@ Material Design inspired data grid component
           <span>[[perPageLabel]]</span>
         </div>
       </template>
+      <div id="infScrollIcon" class="layout horizontal center-center" hidden$="[[!_infiniteScrolling]]"><iron-icon icon="refresh"></iron-icon></div>
     </div>
     <content id="template" select="template"></content>
   </template>
@@ -201,7 +232,7 @@ Material Design inspired data grid component
         fixedHeaderFooter: {
           type: Boolean,
           value: false
-        },
+        }
       },
       behaviors: [Polymer.Templatizer],
       observers: [
@@ -211,6 +242,8 @@ Material Design inspired data grid component
         '_fixedHeaderFooterChanged(fixedHeaderFooter)',
         '_gridLinesChanged(gridLines)'
       ],
+      _scroller: null,
+      _infiniteScrolling: false,
       _itemsChanged: function(change) {
         if (change.path === 'items' || change.path === 'items.splices') {
           var template = Polymer.dom(this.$.template).getDistributedNodes()[0];
@@ -236,6 +269,7 @@ Material Design inspired data grid component
             row.addEventListener('dblclick', this._rowDblClick.bind(this));
             gridDom.appendChild(row);
           }
+          this._hideInfiniteScrollIcon();
         } else if (change.path.indexOf('items.#') === 0) {
           var path = change.path.substr(7);
           var subpathIdx = path.indexOf('.');
@@ -312,7 +346,7 @@ Material Design inspired data grid component
         } else {
           this.$.dggrid.style.height = '';
           this.$.dggrid.style['overflow-y'] = 'initial';
-          this.$.dgwrapper.style['overflow-y'] = 'auto';
+          this.$.dgwrapper.style['overflow-y'] = 'initial';
         }
       },
       _gridLinesChanged: function() {
@@ -400,6 +434,30 @@ Material Design inspired data grid component
         if (dd.opened) { return; }
         dd.open();
       },
+      _scrollHandler: function() {
+        var h1 = (this.fixedHeaderFooter)
+                ? this._scroller.scrollHeight
+                : parseInt(document.defaultView.getComputedStyle(this.$.dgwrapper, '').getPropertyValue('height'), 10);
+        var h2 = (this.fixedHeaderFooter)
+                ? parseInt(document.defaultView.getComputedStyle(this.$.dgwrapper, '').getPropertyValue('height'), 10)
+                : parseInt(document.defaultView.getComputedStyle(this._scroller, '').getPropertyValue('height'), 10);
+        if (this._infiniteScrolling === false && this._scroller.scrollTop >= (h1 - h2)) {
+          this._showInfiniteScrollIcon();
+          this.fire('scroll-more');
+        }
+      },
+      _showInfiniteScrollIcon: function() {
+        if (this.fixedHeaderFooter) {
+          this.$.dggrid.style.height = 'calc(100% - 112px)';
+        }
+        this._infiniteScrolling = true;
+      },
+      _hideInfiniteScrollIcon: function() {
+        if (this.fixedHeaderFooter) {
+          this.$.dggrid.style.height = 'calc(100% - 56px)';
+        }
+        this._infiniteScrolling = false;
+      },
       clearSelection: function() {
         if (Array.isArray(this.selectedItems)) {
           for (var i = this.selectedItems.length - 1; i >= 0; i--) {
@@ -427,6 +485,23 @@ Material Design inspired data grid component
           this.deselectItem(item);
         } else {
           this.selectItem(item);
+        }
+      },
+      enableInfiniteScroll: function(scroller) {
+        if (scroller !== undefined) {
+          this._scroller = scroller;
+        } else {
+          this._scroller = this.$.dggrid;
+        }
+        this._scrollListener = this._scrollHandler.bind(this);
+        this._scroller.addEventListener('scroll', this._scrollListener);
+      },
+      infiniteScrollDone: function() {
+        this._hideInfiniteScrollIcon();
+      },
+      detached: function() {
+        if (this._scroller) {
+          this._scroller.removeEventListener('scroll', this._scrollListener);
         }
       },
       ready: function() {
