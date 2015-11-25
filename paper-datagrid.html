@@ -247,7 +247,9 @@ Material Design inspired data grid component
       _itemsChanged: function(change) {
         if (change.path === 'items' || change.path === 'items.splices') {
           var template = Polymer.dom(this.$.template).getDistributedNodes()[0];
-          this.templatize(template);
+          if (!this.ctor) {
+            this.templatize(template);
+          }
           var headerDom = Polymer.dom(this.$.dgheader);
           if (headerDom.childNodes.length === 0) {
             headerDom.appendChild(this.stamp({isHeader:true}).root);
