@@ -4,4 +4,3 @@
 
 * Readme Documentation
 * Links to demos
-* Travis build
