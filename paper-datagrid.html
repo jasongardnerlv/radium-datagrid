@@ -6,6 +6,7 @@
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../paper-material/paper-material.html">
 <link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="datagrid-icons.html">
 <link rel="import" href="paper-datagrid-column.html">
 
 <!--
@@ -166,8 +167,10 @@ column.
       <div id="dggrid"></div>
       <template is="dom-if" if="[[enablePaging]]">
         <div id="dgfooter" class="center horizontal-reverse layout">
-          <paper-icon-button icon="chevron-right" on-click="_nextPage"></paper-icon-button>
-          <paper-icon-button icon="chevron-left" on-click="_prevPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:last-page" on-click="_lastPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:next-page" on-click="_nextPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:prev-page" on-click="_prevPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:first-page" on-click="_firstPage"></paper-icon-button>
           <span id="pages">[[_calcPaging(currentPage,itemsPerPage,totalItems,pageCountLabel)]]</span>
           <div>
             <paper-icon-button id="perPageArrow" icon="arrow-drop-down" noink on-click="_showPageOpts"></paper-icon-button>
@@ -223,6 +226,18 @@ column.
        * The user desires to navigate to the previous page
        *
        * @event prev-page
+       */
+
+      /*
+       * The user desires to navigate to the first page
+       *
+       * @event first-page
+       */
+
+      /*
+       * The user desires to navigate to the last page
+       *
+       * @event last-page
        */
 
       /*
@@ -544,6 +559,12 @@ column.
       },
       _prevPage: function(e) {
         this.fire('prev-page');
+      },
+      _firstPage: function(e) {
+        this.fire('first-page')
+      },
+      _lastPage: function(e) {
+        this.fire('last-page')
       },
       _showPageOpts: function(e) {
         var dd = this.$$('#optionsDropdown');

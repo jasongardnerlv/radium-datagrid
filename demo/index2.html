@@ -35,7 +35,8 @@
       <div id="gridExample">
         <paper-datagrid id="grid" items="[[_appliedItems]]" enable-paging="[[_pagingEnabled]]" items-per-page="[[_rowsPerPage]]"
         per-page-options="[[_pageOptions]]" current-page="[[_currentPage]]" total-items="[[_getTotalCount(_initialItems)]]"
-        on-next-page="_nextPage" on-prev-page="_prevPage" on-per-page-change="_pageSizeChanged">
+        on-next-page="_nextPage" on-prev-page="_prevPage" on-first-page="_firstPage" on-last-page="_lastPage"
+        on-per-page-change="_pageSizeChanged">
           <template>
             <paper-datagrid-column id="icon" column-width="72px"><iron-icon icon="[[row.icon]]"></iron-icon></paper-datagrid-column>
             <paper-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></paper-datagrid-column>
@@ -92,6 +93,14 @@
           return;
         }
         app._currentPage -= 1;
+        app._refreshData();
+      };
+      app._firstPage = function() {
+        app._currentPage = 1;
+        app._refreshData();
+      };
+      app._lastPage = function() {
+        app._currentPage = Math.floor((app._initialItems.length - 1) / app._rowsPerPage) + 1;
         app._refreshData();
       };
       app._getTotalCount = function(fb) {
