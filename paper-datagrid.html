@@ -448,12 +448,7 @@ column.
       },
       _fixedHeaderFooterChanged: function() {
         if (this.fixedHeaderFooter === true) {
-          //TODO get these values from css
-          var hfHeight = '56px';
-          if (this.enablePaging === true) {
-            hfHeight = '112px';
-          }
-          this.$.dggrid.style.height = 'calc(100% - ' + hfHeight + ')';
+          this._setGridHeight();
           this.$.dggrid.style['overflow-y'] = 'overlay';
           this.$.dgwrapper.style['overflow-y'] = 'hidden';
         } else {
@@ -461,6 +456,14 @@ column.
           this.$.dggrid.style['overflow-y'] = 'initial';
           this.$.dgwrapper.style['overflow-y'] = 'initial';
         }
+      },
+      _setGridHeight: function() {
+        //TODO get these values from css
+        var hfHeight = '56px';
+        if (this.enablePaging === true) {
+          hfHeight = '112px';
+        }
+        this.$.dggrid.style.height = 'calc(100% - ' + hfHeight + ')';
       },
       _gridLinesChanged: function() {
         this._updateGridLines(this.$.dgheader);
@@ -567,7 +570,7 @@ column.
       },
       _hideInfiniteScrollIcon: function() {
         if (this.fixedHeaderFooter) {
-          this.$.dggrid.style.height = 'calc(100% - 56px)';
+          this._setGridHeight();
         }
         this._infiniteScrolling = false;
       },
