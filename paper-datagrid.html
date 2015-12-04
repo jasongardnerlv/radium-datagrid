@@ -533,6 +533,15 @@ column.
           this._resizeColumns(rows[i], idx, delta);
         }
       },
+      _getColumnHeaderById: function(colId) {
+        for (var i = 0; i < this.$.dgheader.children.length; i++) {
+          var header = this.$.dgheader.children[i];
+          if (colId === header.id) {
+            return header;
+          }
+        }
+        return null;
+      },
       _forwardParentProp: function(prop, value) {
         if (prop !== 'row') {
           var columns = this.querySelectorAll('paper-datagrid-column');
@@ -594,6 +603,21 @@ column.
           this._setGridHeight();
         }
         this._infiniteScrolling = false;
+      },
+      /**
+       * Have the column headers reflect the initial sort
+       *
+       * @method setInitialSort
+       * @param {String} Id of the column that is currently sorted
+       * @param {Boolean} Initial sort should be descending (default is ascending)
+       */
+      setInitialSort: function(colId, desc) {
+        var column = this._getColumnHeaderById(colId);
+        if (column !== null) {
+          column._sortDirection = (desc) ? 'desc' : 'asc';
+        } else {
+          throw new Error('Unrecognized column: ' + colId);
+        }
       },
       /**
        * Clear any currently selected rows
