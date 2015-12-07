@@ -38,6 +38,7 @@ column.
 @demo demo/index4.html Fixed header
 @demo demo/index5.html Infinite scroll
 @demo demo/index6.html Infinite scroll 2
+@demo demo/index7.html Column Filtering
 -->
 <dom-module id="paper-datagrid">
   <style is="custom-style">
@@ -92,6 +93,12 @@ column.
     }
     :host ::content .vert-lines paper-datagrid-column:last-of-type {
       border-right: none;
+    }
+    :host([filters-enabled]) ::content paper-datagrid-column #colHeader {
+      height: 32px;
+    }
+    :host([filters-enabled]) ::content paper-datagrid-column #colFilter {
+      display: block !important;
     }
     #dgfooter {
       height: 56px;
@@ -358,6 +365,14 @@ column.
         fixedHeaderFooter: {
           type: Boolean,
           value: false
+        },
+        /**
+         * Whether or not to show column filters in the header
+         */
+        filtersEnabled: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
         }
       },
       behaviors: [Polymer.Templatizer],
