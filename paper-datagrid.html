@@ -381,7 +381,8 @@ column.
         '_selectionEnabledChanged(selectionEnabled)',
         '_multiSelectionChanged(multiSelection)',
         '_fixedHeaderFooterChanged(fixedHeaderFooter)',
-        '_gridLinesChanged(gridLines)'
+        '_gridLinesChanged(gridLines)',
+        '_filtersEnabledChanged(filtersEnabled)'
       ],
       _scroller: null,
       _infiniteScrolling: false,
@@ -426,6 +427,12 @@ column.
               child.set('_model.' + path, change.value);
             }
           }
+        }
+      },
+      _filtersEnabledChanged: function() {
+        var firstFilter = this.$.dgheader.querySelector('#colFilter[data-filter] input');
+        if (firstFilter !== null) {
+          firstFilter.focus();
         }
       },
       _selectionEnabledChanged: function(selectionEnabled) {
