@@ -719,6 +719,17 @@ column.
       infiniteScrollDone: function() {
         this._hideInfiniteScrollIcon();
       },
+      /**
+       * Remove the values from all column header filter inputs.
+       *
+       * @method clearFilters
+       */
+      clearFilters: function() {
+        var filterInputs = this.$.dgheader.querySelectorAll('#colFilter[data-filter] input');
+        for (var i = 0; i < filterInputs.length; i++) {
+          filterInputs[i].value = '';
+        };
+      },
       detached: function() {
         if (this._scroller) {
           this._scroller.removeEventListener('scroll', this._scrollListener);
