@@ -80,14 +80,19 @@
     }
     #dgcolumn > ::content #colFilter {
       display: none;
-      opacity: 0;
-      pointer-events: none;
       height: 24px;
       line-height: 24px;
     }
-    #dgcolumn > ::content #colFilter[data-filter] {
-      opacity: 1;
+    #dgcolumn > ::content #colFilter #filterInput {
+      display: none;
+      pointer-events: none;
+    }
+    #dgcolumn > ::content #colFilter[data-filter] #filterInput {
+      display: initial;
       pointer-events: initial;
+    }
+    #dgcolumn > ::content #colFilter[data-filter] #filterPH {
+      display: none;
     }
     #dgcolumn > ::content paper-input-container {
       line-height: 16px;
@@ -110,6 +115,7 @@
       </div>
       <div id="colFilter" data-filter$="[[filterable]]">
         <paper-input id="filterInput" no-label-float></paper-input>
+        <div id="filterPH">&nbsp;</div>
       </div>
     </template>
   </template>
