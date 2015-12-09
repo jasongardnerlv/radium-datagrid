@@ -6,10 +6,11 @@
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../paper-material/paper-material.html">
 <link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="datagrid-icons.html">
 <link rel="import" href="paper-datagrid-column.html">
 
 <!--
-Material Design inspired data grid component
+A Material Design inspired data grid element for Polymer.js apps.
 
 This element uses, as an initial foundation, the Google Material Design specification for data tables:
 [Data Tables](https://www.google.com/design/spec/components/data-tables.html)
@@ -37,6 +38,7 @@ column.
 @demo demo/index4.html Fixed header
 @demo demo/index5.html Infinite scroll
 @demo demo/index6.html Infinite scroll 2
+@demo demo/index7.html Column Filtering
 -->
 <dom-module id="paper-datagrid">
   <style is="custom-style">
@@ -76,6 +78,9 @@ column.
       margin-right: 24px;
       width: calc(100% - 36px);
     }
+    :host ::content .row paper-datagrid-column:only-child #dgcolumn {
+      width: calc(100% - 48px);
+    }
     :host ::content .hztl-lines paper-datagrid-column {
       border-bottom-style: solid;
       border-bottom-width: 1px;
@@ -88,6 +93,12 @@ column.
     }
     :host ::content .vert-lines paper-datagrid-column:last-of-type {
       border-right: none;
+    }
+    :host([filters-enabled]) ::content paper-datagrid-column #colHeader {
+      height: 32px;
+    }
+    :host([filters-enabled]) ::content paper-datagrid-column #colFilter {
+      display: block !important;
     }
     #dgfooter {
       height: 56px;
@@ -163,8 +174,10 @@ column.
       <div id="dggrid"></div>
       <template is="dom-if" if="[[enablePaging]]">
         <div id="dgfooter" class="center horizontal-reverse layout">
-          <paper-icon-button icon="chevron-right" on-click="_nextPage"></paper-icon-button>
-          <paper-icon-button icon="chevron-left" on-click="_prevPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:last-page" on-click="_lastPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:next-page" on-click="_nextPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:prev-page" on-click="_prevPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:first-page" on-click="_firstPage"></paper-icon-button>
           <span id="pages">[[_calcPaging(currentPage,itemsPerPage,totalItems,pageCountLabel)]]</span>
           <div>
             <paper-icon-button id="perPageArrow" icon="arrow-drop-down" noink on-click="_showPageOpts"></paper-icon-button>
@@ -220,6 +233,18 @@ column.
        * The user desires to navigate to the previous page
        *
        * @event prev-page
+       */
+
+      /*
+       * The user desires to navigate to the first page
+       *
+       * @event first-page
+       */
+
+      /*
+       * The user desires to navigate to the last page
+       *
+       * @event last-page
        */
 
       /*
@@ -340,6 +365,14 @@ column.
         fixedHeaderFooter: {
           type: Boolean,
           value: false
+        },
+        /**
+         * Whether or not to show column filters in the header
+         */
+        filtersEnabled: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
         }
       },
       behaviors: [Polymer.Templatizer],
@@ -348,7 +381,8 @@ column.
         '_selectionEnabledChanged(selectionEnabled)',
         '_multiSelectionChanged(multiSelection)',
         '_fixedHeaderFooterChanged(fixedHeaderFooter)',
-        '_gridLinesChanged(gridLines)'
+        '_gridLinesChanged(gridLines)',
+        '_filtersEnabledChanged(filtersEnabled)'
       ],
       _scroller: null,
       _infiniteScrolling: false,
@@ -393,6 +427,12 @@ column.
               child.set('_model.' + path, change.value);
             }
           }
+        }
+      },
+      _filtersEnabledChanged: function() {
+        var firstFilter = this.$.dgheader.querySelector('#colFilter[data-filter] input');
+        if (firstFilter !== null) {
+          firstFilter.focus();
         }
       },
       _selectionEnabledChanged: function(selectionEnabled) {
@@ -445,19 +485,22 @@ column.
       },
       _fixedHeaderFooterChanged: function() {
         if (this.fixedHeaderFooter === true) {
-          //TODO get these values from css
-          var hfHeight = '56px';
-          if (this.enablePaging === true) {
-            hfHeight = '112px';
-          }
-          this.$.dggrid.style.height = 'calc(100% - ' + hfHeight + ')';
+          this._setGridHeight();
           this.$.dggrid.style['overflow-y'] = 'overlay';
           this.$.dgwrapper.style['overflow-y'] = 'hidden';
         } else {
           this.$.dggrid.style.height = '';
           this.$.dggrid.style['overflow-y'] = 'initial';
-          this.$.dgwrapper.style['overflow-y'] = 'initial';
+          this.$.dgwrapper.style['overflow-y'] = 'hidden';
         }
+      },
+      _setGridHeight: function() {
+        //TODO get these values from css
+        var hfHeight = '56px';
+        if (this.enablePaging === true) {
+          hfHeight = '112px';
+        }
+        this.$.dggrid.style.height = 'calc(100% - ' + hfHeight + ')';
       },
       _gridLinesChanged: function() {
         this._updateGridLines(this.$.dgheader);
@@ -512,6 +555,15 @@ column.
           this._resizeColumns(rows[i], idx, delta);
         }
       },
+      _getColumnHeaderById: function(colId) {
+        for (var i = 0; i < this.$.dgheader.children.length; i++) {
+          var header = this.$.dgheader.children[i];
+          if (colId === header.id) {
+            return header;
+          }
+        }
+        return null;
+      },
       _forwardParentProp: function(prop, value) {
         if (prop !== 'row') {
           var columns = this.querySelectorAll('paper-datagrid-column');
@@ -539,6 +591,12 @@ column.
       _prevPage: function(e) {
         this.fire('prev-page');
       },
+      _firstPage: function(e) {
+        this.fire('first-page')
+      },
+      _lastPage: function(e) {
+        this.fire('last-page')
+      },
       _showPageOpts: function(e) {
         var dd = this.$$('#optionsDropdown');
         if (dd.opened) { return; }
@@ -564,9 +622,24 @@ column.
       },
       _hideInfiniteScrollIcon: function() {
         if (this.fixedHeaderFooter) {
-          this.$.dggrid.style.height = 'calc(100% - 56px)';
+          this._setGridHeight();
         }
         this._infiniteScrolling = false;
+      },
+      /**
+       * Have the column headers reflect the initial sort
+       *
+       * @method setInitialSort
+       * @param {String} Id of the column that is currently sorted
+       * @param {Boolean} Initial sort should be descending (default is ascending)
+       */
+      setInitialSort: function(colId, desc) {
+        var column = this._getColumnHeaderById(colId);
+        if (column !== null) {
+          column._sortDirection = (desc) ? 'desc' : 'asc';
+        } else {
+          throw new Error('Unrecognized column: ' + colId);
+        }
       },
       /**
        * Clear any currently selected rows
@@ -645,6 +718,17 @@ column.
        */
       infiniteScrollDone: function() {
         this._hideInfiniteScrollIcon();
+      },
+      /**
+       * Remove the values from all column header filter inputs.
+       *
+       * @method clearFilters
+       */
+      clearFilters: function() {
+        var filterInputs = this.$.dgheader.querySelectorAll('#colFilter[data-filter] input');
+        for (var i = 0; i < filterInputs.length; i++) {
+          filterInputs[i].value = '';
+        };
       },
       detached: function() {
         if (this._scroller) {

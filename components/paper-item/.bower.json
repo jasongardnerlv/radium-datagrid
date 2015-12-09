@@ -49,6 +49,6 @@
     "commit": "e6d048b25af0a84e1ff9f48450f07972326d476b"
   },
   "_source": "git://github.com/PolymerElements/paper-item.git",
-  "_target": "^1.0.5",
+  "_target": "^1.1.2",
   "_originalSource": "PolymerElements/paper-item"
 }
