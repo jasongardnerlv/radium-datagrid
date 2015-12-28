@@ -2,6 +2,9 @@
 <link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
 <link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-item/paper-item.html">
 <dom-module id="paper-datagrid-column">
   <style is="custom-style">
     :host {
@@ -83,6 +86,9 @@
       height: 24px;
       line-height: 24px;
     }
+    #dgcolumn > ::content paper-dropdown-menu {
+      display: block;
+    }
     #dgcolumn > ::content #colFilter #filterInput {
       display: none;
       pointer-events: none;
@@ -102,6 +108,10 @@
       font-size: 12px;
       line-height: 16px;
     }
+    #dgcolumn > ::content paper-input-container iron-icon {
+      width: 16px;
+      height: 16px;
+    }
   </style>
   <template>
     <div class="splitter">&nbsp;</div><!--
@@ -114,7 +124,15 @@
         <div>[[header]]</div>
       </div>
       <div id="colFilter" data-filter$="[[filterable]]">
-        <paper-input id="filterInput" no-label-float></paper-input>
+        <paper-input id="filterInput" no-label-float hidden$="[[_showFilterOptions]]"></paper-input>
+        <paper-dropdown-menu id="filterMenu" no-label-float hidden$="[[!_showFilterOptions]]" horizontal-align="left">
+          <paper-listbox class="dropdown-content">
+            <paper-item>&nbsp;</paper-item>
+            <template is="dom-repeat" items="[[filterOptions]]">
+              <paper-item>[[item]]</paper-item>
+            </template>
+          </paper-listbox>
+        </paper-dropdown-menu>
         <div id="filterPH">&nbsp;</div>
       </div>
     </template>
@@ -169,13 +187,18 @@
           type: Boolean,
           value: false
         },
+        filterOptions: {
+          type: Array,
+          value: null
+        },
         _isHeader: {
           type: Boolean,
           value: false
         },
         _headerClasses: String,
         _headerStyle: String,
-        _model: Object
+        _model: Object,
+        _showFilterOptions: Boolean
       },
       behaviors: [Polymer.Templatizer],
       observers: [
@@ -183,7 +206,8 @@
         '_widthChanged(columnWidth)',
         '_headerChanged(header)',
         '_alignmentChanged(alignment)',
-        '_modelChanged(_model.*)'
+        '_modelChanged(_model.*)',
+        '_filterOptionsChanged(filterOptions)'
       ],
       _sortDirectionChanged: function() {
         this._computeHeaderClasses();
@@ -299,6 +323,9 @@
           this.toggleClass('selected', false);
         }
       },
+      _filterOptionsChanged: function() {
+        this._showFilterOptions = (this.filterOptions !== undefined && this.filterOptions !== null);
+      },
       _onColumnDrag: function(e) {
         var colIdx = Array.prototype.indexOf.call(this.parentNode.children, this);
         this.fire('column-resize', {idx:colIdx, delta:e.clientX - this._colDragX});
@@ -308,7 +335,7 @@
         window.removeEventListener('mousemove', this._boundColumnDragHandler);
         window.removeEventListener('mouseup', this._boundColumnDragEndHandler);
       },
-      attached:function() {
+      attached: function() {
         if (this._isHeader) {
           this.domHost.addEventListener('sort', this._sortChanged.bind(this));
         } else {
@@ -327,9 +354,14 @@
         }.bind(this));
         var filterInput = this.querySelector('#filterInput');
         if (filterInput !== null) {
-          this._boundColumnDragEndHandler = this._onColumnEndDrag.bind(this);
           filterInput.addEventListener('change', function() {
             this.fire('filter', {id:this.id, value:filterInput.value});
+          }.bind(this));
+        }
+        var filterBox = this.querySelector('#filterMenu paper-listbox');
+        if (filterBox !== null) {
+          filterBox.addEventListener('iron-select', function(e) {
+            this.fire('filter', {id:this.id, value:filterBox.selected - 1});
           }.bind(this));
         }
       },

@@ -39,6 +39,7 @@
             <paper-datagrid-column id="foo" header="Foo" filterable><span>[[row.foo]]</span></paper-datagrid-column>
             <paper-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></paper-datagrid-column>
             <paper-datagrid-column id="baz" header="Baz" filterable><span>[[row.baz]]</span></paper-datagrid-column>
+            <paper-datagrid-column id="status" header="Status" filterable filter-options="[[_statusArr]]"><span>[[_getStatusLabel(row.status, _statusArr)]]</span></paper-datagrid-column>
           </template>
         </paper-datagrid>
       </div>
@@ -50,6 +51,7 @@
   <script>
       app._showFilters = false;
       app._currentFilters = {};
+      app._statusArr = ['Good','Fair','Bad'];
       app._genFakeData = function() {
         var data = [];
         for (var i=0;i<260;i++) {
@@ -61,6 +63,7 @@
             foo: firstChar + secondChar + firstChar + secondChar,
             bar: secondChar + firstChar + secondChar + firstChar,
             baz: a.toString() + b.toString(),
+            status: i % 3,
             icon:'polymer'
           });
         }
@@ -73,8 +76,13 @@
         var filtered = app._initialItems.slice(0);
         for (var prop in app._currentFilters) {
           filtered = filtered.filter(function(obj) {
-            return (app._currentFilters[prop] === '' ||
-              obj[prop].toLowerCase().indexOf(app._currentFilters[prop].toLowerCase()) >= 0);
+            if (prop === 'status') {
+              return (app._currentFilters[prop] === -1 ||
+                obj[prop] === app._currentFilters[prop]);
+            } else {
+              return (app._currentFilters[prop] === '' ||
+                obj[prop].toLowerCase().indexOf(app._currentFilters[prop].toLowerCase()) >= 0);
+            }
           });
         }
         app._appliedItems = filtered;
@@ -82,6 +90,9 @@
       app._filterChanged = function(e) {
         app._currentFilters[e.detail.id] = e.detail.value;
         app._applyFilters();
+      };
+      app._getStatusLabel = function(status, items) {
+        return items[status];
       };
       app._initialItems = app._genFakeData();
       app._appliedItems = app._initialItems;

@@ -41,5 +41,8 @@ Simple infinite scroll example.
 ####[Infinite scroll 2](http://jasongardnerlv.github.io/paper-datagrid/components/paper-datagrid/demo/index6.html)
 Infinite scroll within a fixed height container with fixed headers.
 
+####[Column Filters](http://jasongardnerlv.github.io/paper-datagrid/components/paper-datagrid/demo/index7.html)
+Toggle inputs on column headers to filter data.
+
 ###License
 MIT Licensed

@@ -173,12 +173,10 @@ column.
       <div id="dgheader" class="header row center horizontal layout"></div>
       <div id="dggrid"></div>
       <template is="dom-if" if="[[enablePaging]]">
-        <div id="dgfooter" class="center horizontal-reverse layout">
-          <paper-icon-button icon="datagrid:last-page" on-click="_lastPage"></paper-icon-button>
-          <paper-icon-button icon="datagrid:next-page" on-click="_nextPage"></paper-icon-button>
-          <paper-icon-button icon="datagrid:prev-page" on-click="_prevPage"></paper-icon-button>
-          <paper-icon-button icon="datagrid:first-page" on-click="_firstPage"></paper-icon-button>
-          <span id="pages">[[_calcPaging(currentPage,itemsPerPage,totalItems,pageCountLabel)]]</span>
+        <div id="dgfooter" class="center horizontal layout">
+          <div class="flex"></div>
+          <span>[[perPageLabel]]</span>
+          <span id="perPage">[[itemsPerPage]]</span>
           <div>
             <paper-icon-button id="perPageArrow" icon="arrow-drop-down" noink on-click="_showPageOpts"></paper-icon-button>
             <iron-dropdown id="optionsDropdown" horizontal-align="right" vertical-align="bottom">
@@ -191,8 +189,11 @@ column.
               </paper-material>
             </iron-dropdown>
           </div>
-          <span id="perPage">[[itemsPerPage]]</span>
-          <span>[[perPageLabel]]</span>
+          <span id="pages">[[_calcPaging(currentPage,itemsPerPage,totalItems,pageCountLabel)]]</span>
+          <paper-icon-button icon="datagrid:first-page" on-click="_firstPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:prev-page" on-click="_prevPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:next-page" on-click="_nextPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:last-page" on-click="_lastPage"></paper-icon-button>
         </div>
       </template>
       <div id="infScrollIcon" class="layout horizontal center-center" hidden$="[[!_infiniteScrolling]]"><iron-icon icon="refresh"></iron-icon></div>

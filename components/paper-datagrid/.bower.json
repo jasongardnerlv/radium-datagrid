@@ -36,11 +36,11 @@
     "web-component-tester": "Polymer/web-component-tester#^3.3.0",
     "test-fixture": "PolymerElements/test-fixture#^1.0.0"
   },
-  "_release": "2dc145e08c",
+  "_release": "cd1b22b9f3",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "2dc145e08c2feef1970b86e88b757faf5639df5c"
+    "commit": "cd1b22b9f3c6d8a24df9c308a33da221285911eb"
   },
   "_source": "git://github.com/jasongardnerlv/paper-datagrid.git",
   "_target": "*",
