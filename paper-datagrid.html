@@ -449,7 +449,7 @@ column.
       _selectionHandler: function(e) {
         if (e.type !== 'keypress' || e.keyCode === 13) {
           var model = this.modelForElement(e.target);
-          if (model) {
+          if (model && model.row) {
             if (!this.desktopMultiSelection) {
               this.toggleSelectionForItem(model.row);
             } else {
