@@ -387,6 +387,7 @@ column.
       ],
       _scroller: null,
       _infiniteScrolling: false,
+      _columnWidths: {},
       _itemsChanged: function(change) {
         if (change.path === 'items' || change.path === 'items.splices') {
           var template = Polymer.dom(this.$.template).getDistributedNodes()[0];
@@ -415,6 +416,7 @@ column.
             gridDom.appendChild(row);
           }
           this._hideInfiniteScrollIcon();
+          this._applyColumnWidths();
         } else if (change.path.indexOf('items.#') === 0) {
           var path = change.path.substr(7);
           var subpathIdx = path.indexOf('.');
@@ -529,32 +531,39 @@ column.
         }
         this.fire('row-dblclick', this.modelForElement(col).row);
       },
-      _resizeCell: function(cell, width) {
-        cell.style['min-width'] = width;
-        cell.style['max-width'] = width;
-        cell.style.flex = 'initial';
+      _applyColumnWidths: function() {
+        Object.keys(this._columnWidths).forEach(function(key) {
+          var rows = Polymer.dom(this.$.dggrid).children;
+          for (var i = 0; i < rows.length; i++) {
+            this._resizeCell(rows[i].children[key], this._columnWidths[key]);
+          }
+        }.bind(this));
       },
-      _resizeColumns: function(row, idx, delta) {
+      _resizeHeaders: function(idx, delta) {
         var minColWidth = 48;
-        var col = row.children[idx];
+        var col = this.$.dgheader.children[idx];
         var colWidth = document.defaultView.getComputedStyle(col, '').getPropertyValue('width');
         var newColWidth = (parseInt(colWidth, 10) - delta);
-        var prev = row.children[idx - 1];
+        var prev = this.$.dgheader.children[idx - 1];
         var prevWidth = document.defaultView.getComputedStyle(prev, '').getPropertyValue('width');
         var newPrevWidth = (parseInt(prevWidth, 10) + delta);
         if (newColWidth > minColWidth && newPrevWidth > minColWidth) {
-          this._resizeCell(col, newColWidth + 'px');
-          this._resizeCell(prev, newPrevWidth + 'px');
+          this._columnWidths[idx] = newColWidth;
+          this._columnWidths[idx-1] = newPrevWidth;
+          this._resizeCell(col, newColWidth);
+          this._resizeCell(prev, newPrevWidth);
         }
+      },
+      _resizeCell: function(cell, width) {
+        cell.style['min-width'] = width + 'px';
+        cell.style['max-width'] = width + 'px';
+        cell.style.flex = 'initial';
       },
       _columnResize: function(e) {
         var idx = e.detail.idx;
         var delta = e.detail.delta;
-        this._resizeColumns(this.$.dgheader, idx, delta);
-        var rows = Polymer.dom(this.$.dggrid).children;
-        for (var i = 0; i < rows.length; i++) {
-          this._resizeColumns(rows[i], idx, delta);
-        }
+        this._resizeHeaders(idx, delta);
+        this._applyColumnWidths();
       },
       _getColumnHeaderById: function(colId) {
         for (var i = 0; i < this.$.dgheader.children.length; i++) {
