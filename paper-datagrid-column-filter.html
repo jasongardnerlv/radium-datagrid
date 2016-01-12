@@ -1,3 +1,11 @@
+<link rel="import" href="../iron-dropdown/iron-dropdown.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="datestring-validator.html">
 <dom-module id="paper-datagrid-column-filter">
   <style is="custom-style">
     #colFilter {
@@ -19,23 +27,47 @@
     #colFilter[data-filter] #filterPH {
       display: none;
     }
-    #colFilter[data-filter] ::content paper-input-container {
+    #colFilter[data-filter] #filterInput ::content paper-input-container,
+    #colFilter[data-filter] #filterMenu ::content paper-input-container {
       line-height: 16px;
       padding: 0px;
     }
-    #colFilter[data-filter] ::content paper-input-container input {
+    #colFilter[data-filter] #filterInput ::content paper-input-container input,
+    #colFilter[data-filter] #filterMenu ::content paper-input-container input {
       font-size: 12px;
       line-height: 16px;
     }
-    #colFilter[data-filter] ::content paper-input-container iron-icon {
+    #colFilter[data-filter] #filterMenu ::content paper-input-container iron-icon {
       width: 16px;
       height: 16px;
     }
+    #colFilter[data-filter] #btnFilterDate {
+      font-size: 12px;
+      text-transform: initial;
+      padding: 0px;
+      margin: 0px;
+      color: rgba(0, 0, 0, 0.54);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+    #colFilter[data-filter] #ddFilterDate paper-material {
+      background-color: #FFFFFF;
+      min-width: 256px;
+      min-height: 160px;
+      overflow: hidden;
+    }
+    #colFilter[data-filter] #ddFilterDate paper-input {
+      padding: 0px 16px;
+    }
   </style>
   <template>
+    <datestring-validator id="datevalidator" validator-name="datevalidator"></datestring-validator>
     <div id="colFilter" data-filter$="[[_filtersEnabled(filterType)]]">
-      <paper-input id="filterInput" no-label-float hidden$="[[!_showFilterInput(filterType)]]"></paper-input>
-      <paper-dropdown-menu id="filterMenu" no-label-float hidden$="[[!_showFilterOptions(filterType)]]" horizontal-align="left">
+      <paper-input id="filterInput" no-label-float hidden$="[[!_showFilter(filterType, 'text')]]"></paper-input>
+      <paper-dropdown-menu id="filterMenu" no-label-float hidden$="[[!_showFilter(filterType, 'options')]]"
+          horizontal-align="right">
         <paper-listbox class="dropdown-content">
           <paper-item>&nbsp;</paper-item>
           <template is="dom-repeat" items="[[filterOptions]]">
@@ -43,6 +75,14 @@
           </template>
         </paper-listbox>
       </paper-dropdown-menu>
+      <paper-button id="btnFilterDate" hidden$="[[!_showFilter(filterType, 'date')]]" on-tap="_showDateFilter"
+          title$="[[_getButtonLabel(_filterFrom,_filterTo)]]">[[_getButtonLabel(_filterFrom,_filterTo)]]</paper-button>
+      <iron-dropdown id="ddFilterDate" on-iron-overlay-canceled="_dateDDClickOutside" no-cancel-on-esc-key>
+        <paper-material class="dropdown-content">
+          <paper-input id="fromDate" label="From" on-keydown="_dateDDKeyPress" required validator="datevalidator"></paper-input>
+          <paper-input id="toDate" label="To" on-keydown="_dateDDKeyPress" required validator="datevalidator"></paper-input>
+        </paper-material>
+      </iron-dropdown>
       <div id="filterPH">&nbsp;</div>
     </div>
   </template>
@@ -61,18 +101,67 @@
           type: Array,
           value: null
         },
+        _filterFrom: {
+          type: String,
+          value: null
+        },
+        _filterTo: {
+          type: String,
+          value: null
+        }
       },
       _filtersEnabled: function(ft) {
         return ft !== undefined && ft !== '';
       },
-      _showFilterInput: function(ft) {
-        return ft === 'text';
+      _showFilter: function(ft, type) {
+        return ft === type;
       },
-      _showFilterOptions: function(ft) {
-        return ft === 'options';
+      _showDateFilter: function() {
+        this.$.ddFilterDate.open();
+        this.async(function(){this.$.fromDate.focus();}.bind(this));
       },
-      _showFilterDate: function(ft) {
-        return ft === 'date';
+      _dateDDKeyPress: function(e) {
+        if (e.keyCode === 13) {
+          this._checkDateFilters();
+        } else if (e.keyCode === 27) {
+          this.$.ddFilterDate.close();
+        }
+      },
+      _dateDDClickOutside: function() {
+        this._checkDateFilters();
+      },
+      _checkDateFilters: function() {
+        if (this.$.fromDate.value === '' && this.$.toDate.value === '') {
+          this.$.fromDate.value = '';
+          this.$.toDate.value = '';
+          this._filterFrom = null;
+          this._filterTo = null;
+          this.fire('filter', {id:this.columnId, value:null});
+          this.$.ddFilterDate.close();
+          return;
+        }
+        if (!this._validateDateInput(this.$.fromDate) || !this._validateDateInput(this.$.toDate)) {
+          return;
+        }
+        this._filterFrom = this.$.fromDate.value;
+        this._filterTo = this.$.toDate.value;
+        this.$.ddFilterDate.close();
+        this.fire('filter', {id:this.columnId, value:[new Date(this._filterFrom),new Date(this._filterTo)]});
+      },
+      _validateDateInput: function(input) {
+        if (input.validate() === false) {
+          this.async(function(){input.focus();}.bind(this));
+          input.errorMessage = "Valid date string required";
+          return false;
+        }
+        return true;
+      },
+      _getButtonLabel: function(df, dt) {
+        if (!df || !dt) {
+          return '<Select Dates>';
+        } else {
+          return df + ' - ' + dt;
+        }
       },
       ready: function() {
         var filterInput = this.querySelector('#filterInput');

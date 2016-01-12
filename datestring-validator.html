@@ -1,0 +1,13 @@
+<link rel="import" href="../iron-validator-behavior/iron-validator-behavior.html">
+<script>
+  Polymer({
+    is: 'datestring-validator',
+    behaviors: [
+      Polymer.IronValidatorBehavior
+    ],
+    validate: function(value) {
+      if (value === undefined || value === null || value === '') { return false; }
+      return isNaN(new Date(value).getTime()) === false;
+    }
+  });
+</script>

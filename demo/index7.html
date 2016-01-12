@@ -82,6 +82,9 @@
             if (prop === 'status') {
               return (app._currentFilters[prop] === -1 ||
                 obj[prop] === app._currentFilters[prop]);
+            } else if (prop === 'thedate') {
+                return (app._currentFilters[prop] === null ||
+                obj[prop] >= app._currentFilters[prop][0] && obj[prop] <= app._currentFilters[prop][1]);
             } else {
               return (app._currentFilters[prop] === '' ||
                 obj[prop].toLowerCase().indexOf(app._currentFilters[prop].toLowerCase()) >= 0);
