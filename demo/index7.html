@@ -39,11 +39,11 @@
         <paper-datagrid id="grid" items="[[_appliedItems]]" filters-enabled="[[_showFilters]]" on-filter="_filterChanged">
           <template>
             <paper-datagrid-column id="icon" column-width="72px"><iron-icon icon="[[row.icon]]"></iron-icon></paper-datagrid-column>
-            <paper-datagrid-column id="foo" column-width="72px" header="Foo" filterable><span>[[row.foo]]</span></paper-datagrid-column>
+            <paper-datagrid-column id="foo" column-width="72px" header="Foo" filter-type="text"><span>[[row.foo]]</span></paper-datagrid-column>
             <paper-datagrid-column id="bar" column-width="72px" header="Bar"><span>[[row.bar]]</span></paper-datagrid-column>
-            <paper-datagrid-column id="baz" column-width="72px" header="Baz" filterable><span>[[row.baz]]</span></paper-datagrid-column>
-            <paper-datagrid-column id="thedate" header="Date" filterable><span>[[row.thedate]]</span></paper-datagrid-column>
-            <paper-datagrid-column id="status" column-width="120px" header="Status" filterable filter-options="[[_statusArr]]"><span>[[_getStatusLabel(row.status, _statusArr)]]</span></paper-datagrid-column>
+            <paper-datagrid-column id="baz" column-width="72px" header="Baz" filter-type="text"><span>[[row.baz]]</span></paper-datagrid-column>
+            <paper-datagrid-column id="thedate" header="Date" filter-type="date"><span>[[row.thedate]]</span></paper-datagrid-column>
+            <paper-datagrid-column id="status" column-width="120px" header="Status" filter-type="options" filter-options="[[_statusArr]]"><span>[[_getStatusLabel(row.status, _statusArr)]]</span></paper-datagrid-column>
           </template>
         </paper-datagrid>
       </div>

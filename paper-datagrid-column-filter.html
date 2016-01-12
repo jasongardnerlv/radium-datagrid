@@ -33,9 +33,9 @@
     }
   </style>
   <template>
-    <div id="colFilter" data-filter$="[[filterable]]">
-      <paper-input id="filterInput" no-label-float hidden$="[[showFilterOptions]]"></paper-input>
-      <paper-dropdown-menu id="filterMenu" no-label-float hidden$="[[!showFilterOptions]]" horizontal-align="left">
+    <div id="colFilter" data-filter$="[[_filtersEnabled(filterType)]]">
+      <paper-input id="filterInput" no-label-float hidden$="[[!_showFilterInput(filterType)]]"></paper-input>
+      <paper-dropdown-menu id="filterMenu" no-label-float hidden$="[[!_showFilterOptions(filterType)]]" horizontal-align="left">
         <paper-listbox class="dropdown-content">
           <paper-item>&nbsp;</paper-item>
           <template is="dom-repeat" items="[[filterOptions]]">
@@ -53,15 +53,26 @@
       is: 'paper-datagrid-column-filter',
       properties: {
         columnId: String,
-        filterable: {
-          type: Boolean,
-          value: false
+        filterType: {
+          type: String,
+          value: ''
         },
         filterOptions: {
           type: Array,
           value: null
         },
-        showFilterOptions: Boolean
+      },
+      _filtersEnabled: function(ft) {
+        return ft !== undefined && ft !== '';
+      },
+      _showFilterInput: function(ft) {
+        return ft === 'text';
+      },
+      _showFilterOptions: function(ft) {
+        return ft === 'options';
+      },
+      _showFilterDate: function(ft) {
+        return ft === 'date';
       },
       ready: function() {
         var filterInput = this.querySelector('#filterInput');

@@ -93,8 +93,7 @@
         <iron-icon icon="arrow-forward"></iron-icon>
         <div>[[header]]</div>
       </div>
-      <paper-datagrid-column-filter column-id="[[id]]" filterable="[[filterable]]" filter-options="[[filterOptions]]"
-          show-filter-options="[[_showFilterOptions]]"></paper-datagrid-column-filter>
+      <paper-datagrid-column-filter column-id="[[id]]" filter-type="[[filterType]]" filter-options="[[filterOptions]]"></paper-datagrid-column-filter>
     </template>
   </template>
 </dom-module>
@@ -143,10 +142,7 @@
           type: Boolean,
           value: false
         },
-        filterable: {
-          type: Boolean,
-          value: false
-        },
+        filterType: String,
         filterOptions: {
           type: Array,
           value: null
@@ -158,7 +154,7 @@
         _headerClasses: String,
         _headerStyle: String,
         _model: Object,
-        _showFilterOptions: Boolean
+        _filterType: String
       },
       behaviors: [Polymer.Templatizer],
       observers: [
