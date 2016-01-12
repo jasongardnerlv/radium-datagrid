@@ -1,0 +1,82 @@
+<dom-module id="paper-datagrid-column-filter">
+  <style is="custom-style">
+    #colFilter {
+      display: none;
+      height: 24px;
+      line-height: 24px;
+    }
+    paper-dropdown-menu {
+      display: block;
+    }
+    #colFilter #filterInput {
+      display: none;
+      pointer-events: none;
+    }
+    #colFilter[data-filter] #filterInput {
+      display: initial;
+      pointer-events: initial;
+    }
+    #colFilter[data-filter] #filterPH {
+      display: none;
+    }
+    #colFilter[data-filter] ::content paper-input-container {
+      line-height: 16px;
+      padding: 0px;
+    }
+    #colFilter[data-filter] ::content paper-input-container input {
+      font-size: 12px;
+      line-height: 16px;
+    }
+    #colFilter[data-filter] ::content paper-input-container iron-icon {
+      width: 16px;
+      height: 16px;
+    }
+  </style>
+  <template>
+    <div id="colFilter" data-filter$="[[filterable]]">
+      <paper-input id="filterInput" no-label-float hidden$="[[showFilterOptions]]"></paper-input>
+      <paper-dropdown-menu id="filterMenu" no-label-float hidden$="[[!showFilterOptions]]" horizontal-align="left">
+        <paper-listbox class="dropdown-content">
+          <paper-item>&nbsp;</paper-item>
+          <template is="dom-repeat" items="[[filterOptions]]">
+            <paper-item>[[item]]</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu>
+      <div id="filterPH">&nbsp;</div>
+    </div>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'paper-datagrid-column-filter',
+      properties: {
+        columnId: String,
+        filterable: {
+          type: Boolean,
+          value: false
+        },
+        filterOptions: {
+          type: Array,
+          value: null
+        },
+        showFilterOptions: Boolean
+      },
+      ready: function() {
+        var filterInput = this.querySelector('#filterInput');
+        if (filterInput !== null) {
+          filterInput.addEventListener('change', function() {
+            this.fire('filter', {id:this.columnId, value:filterInput.value});
+          }.bind(this));
+        }
+        var filterBox = this.querySelector('#filterMenu paper-listbox');
+        if (filterBox !== null) {
+          filterBox.addEventListener('iron-select', function(e) {
+            this.fire('filter', {id:this.columnId, value:filterBox.selected - 1});
+          }.bind(this));
+        }
+      }
+    });
+  })();
+</script>
