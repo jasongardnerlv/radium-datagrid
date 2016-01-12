@@ -61,6 +61,14 @@
     #colFilter[data-filter] #ddFilterDate paper-input {
       padding: 0px 16px;
     }
+    #colFilter[data-filter] #ddButtons {
+      float: right;
+      margin: 8px;
+    }
+    #colFilter[data-filter] #ddButtons paper-button {
+      color: #0072BC;
+      min-width: 24px;
+    }
   </style>
   <template>
     <datestring-validator id="datevalidator" validator-name="datevalidator"></datestring-validator>
@@ -78,9 +86,14 @@
       <paper-button id="btnFilterDate" hidden$="[[!_showFilter(filterType, 'date')]]" on-tap="_showDateFilter"
           title$="[[_getButtonLabel(_filterFrom,_filterTo)]]">[[_getButtonLabel(_filterFrom,_filterTo)]]</paper-button>
       <iron-dropdown id="ddFilterDate" on-iron-overlay-canceled="_dateDDClickOutside" no-cancel-on-esc-key>
-        <paper-material class="dropdown-content">
-          <paper-input id="fromDate" label="From" on-keydown="_dateDDKeyPress" required validator="datevalidator"></paper-input>
-          <paper-input id="toDate" label="To" on-keydown="_dateDDKeyPress" required validator="datevalidator"></paper-input>
+        <paper-material class="dropdown-content" on-keydown="_dateDDKeyPress" >
+          <paper-input id="fromDate" label="From" required validator="datevalidator"></paper-input>
+          <paper-input id="toDate" label="To" required validator="datevalidator"></paper-input>
+          <div id="ddButtons">
+            <paper-button on-tap="_clearDateFields">Clear</paper-button>
+            <paper-button on-tap="_cancelDateEdits">Cancel</paper-button>
+            <paper-button on-tap="_dateDDClickOutside">OK</paper-button>
+          </div>
         </paper-material>
       </iron-dropdown>
       <div id="filterPH">&nbsp;</div>
@@ -124,7 +137,7 @@
         if (e.keyCode === 13) {
           this._checkDateFilters();
         } else if (e.keyCode === 27) {
-          this.$.ddFilterDate.close();
+          this._cancelDateEdits();
         }
       },
       _dateDDClickOutside: function() {
@@ -162,6 +175,15 @@
         } else {
           return df + ' - ' + dt;
         }
+      },
+      _clearDateFields: function() {
+        this.$.fromDate.value = '';
+        this.$.toDate.value = '';
+      },
+      _cancelDateEdits: function() {
+        this.$.fromDate.value = this._filterFrom;
+        this.$.toDate.value = this._filterTo;
+        this.$.ddFilterDate.close();
       },
       ready: function() {
         var filterInput = this.querySelector('#filterInput');
