@@ -7,7 +7,8 @@
     ],
     validate: function(value) {
       if (value === undefined || value === null || value === '') { return false; }
-      return isNaN(new Date(value).getTime()) === false;
+      var datereg = /^([1-9]|0[1-9]|1[0-2])\/([1-9]|0[1-9]|1\d|2\d|3[01])\/(19|20)\d{2}$/;
+      return datereg.test(value);
     }
   });
 </script>

@@ -11,6 +11,9 @@
   <link rel="import" href="../../paper-button/paper-button.html">
   <link rel="import" href="../paper-datagrid.html">
   <style is="custom-style">
+    :root {
+      --default-primary-color: #0072BC;
+    }
     body {
       font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
@@ -42,7 +45,7 @@
             <paper-datagrid-column id="foo" column-width="72px" header="Foo" filter-type="text"><span>[[row.foo]]</span></paper-datagrid-column>
             <paper-datagrid-column id="bar" column-width="72px" header="Bar"><span>[[row.bar]]</span></paper-datagrid-column>
             <paper-datagrid-column id="baz" column-width="72px" header="Baz" filter-type="text"><span>[[row.baz]]</span></paper-datagrid-column>
-            <paper-datagrid-column id="thedate" header="Date" filter-type="date"><span>[[row.thedate]]</span></paper-datagrid-column>
+            <paper-datagrid-column id="thedate" header="Date" filter-type="date"><span>[[_formatDate(row.thedate)]]</span></paper-datagrid-column>
             <paper-datagrid-column id="status" column-width="120px" header="Status" filter-type="options" filter-options="[[_statusArr]]"><span>[[_getStatusLabel(row.status, _statusArr)]]</span></paper-datagrid-column>
           </template>
         </paper-datagrid>
@@ -99,6 +102,9 @@
       };
       app._getStatusLabel = function(status, items) {
         return items[status];
+      };
+      app._formatDate = function(date) {
+        return date.toUTCString();
       };
       app._initialItems = app._genFakeData();
       app._appliedItems = app._initialItems;

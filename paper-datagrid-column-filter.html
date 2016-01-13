@@ -1,10 +1,13 @@
 <link rel="import" href="../iron-dropdown/iron-dropdown.html">
 <link rel="import" href="../paper-button/paper-button.html">
-<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-item/paper-item.html">
 <link rel="import" href="../paper-listbox/paper-listbox.html">
 <link rel="import" href="../paper-material/paper-material.html">
-<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-date-picker/paper-date-picker.html">
 <link rel="import" href="datestring-validator.html">
 <dom-module id="paper-datagrid-column-filter">
   <style is="custom-style">
@@ -59,7 +62,12 @@
       overflow: hidden;
     }
     #colFilter[data-filter] #ddFilterDate paper-input {
-      padding: 0px 16px;
+      padding: 0px 0px 0px 16px;
+      width: 192px;
+    }
+    #colFilter[data-filter] #ddFilterDate paper-icon-button {
+      padding: 12px 8px 4px 8px;
+      color: #5C5C5C;
     }
     #colFilter[data-filter] #ddButtons {
       float: right;
@@ -68,6 +76,13 @@
     #colFilter[data-filter] #ddButtons paper-button {
       color: #0072BC;
       min-width: 24px;
+    }
+    #dateDialog ::content paper-date-picker {
+      padding: 0px;
+      margin-top: 0px;
+    }
+    #dateDialog ::content #heading .date {
+      font-size: 24px;
     }
   </style>
   <template>
@@ -85,19 +100,32 @@
       </paper-dropdown-menu>
       <paper-button id="btnFilterDate" hidden$="[[!_showFilter(filterType, 'date')]]" on-tap="_showDateFilter"
           title$="[[_getButtonLabel(_filterFrom,_filterTo)]]">[[_getButtonLabel(_filterFrom,_filterTo)]]</paper-button>
-      <iron-dropdown id="ddFilterDate" on-iron-overlay-canceled="_dateDDClickOutside" no-cancel-on-esc-key>
+      <iron-dropdown id="ddFilterDate" on-iron-overlay-canceled="_checkDateFilters" no-cancel-on-esc-key>
         <paper-material class="dropdown-content" on-keydown="_dateDDKeyPress" >
-          <paper-input id="fromDate" label="From" required validator="datevalidator"></paper-input>
-          <paper-input id="toDate" label="To" required validator="datevalidator"></paper-input>
+          <div class="end horizontal layout">
+            <paper-input id="fromDate" label="From" required validator="datevalidator"></paper-input>
+            <paper-icon-button on-tap="_selectFromDate" icon="event"></paper-icon-button>
+          </div>
+          <div class="end horizontal layout">
+            <paper-input id="toDate" label="To" required validator="datevalidator"></paper-input>
+            <paper-icon-button on-tap="_selectToDate" icon="event"></paper-icon-button>
+          </div>
           <div id="ddButtons">
             <paper-button on-tap="_clearDateFields">Clear</paper-button>
             <paper-button on-tap="_cancelDateEdits">Cancel</paper-button>
-            <paper-button on-tap="_dateDDClickOutside">OK</paper-button>
+            <paper-button on-tap="_checkDateFilters">OK</paper-button>
           </div>
         </paper-material>
       </iron-dropdown>
       <div id="filterPH">&nbsp;</div>
     </div>
+    <paper-dialog id="dateDialog" class="paper-date-picker-dialog" modal on-iron-overlay-closed="_dateDialogClosed">
+      <paper-date-picker date="{{_selectedDate}}"></paper-date-picker>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm>OK</paper-button>
+      </div>
+    </paper-dialog>
   </template>
 </dom-module>
 <script>
@@ -121,6 +149,11 @@
         _filterTo: {
           type: String,
           value: null
+        },
+        _selectedDate: {
+          type: Date,
+          notify: true,
+          value: new Date()
         }
       },
       _filtersEnabled: function(ft) {
@@ -140,9 +173,6 @@
           this._cancelDateEdits();
         }
       },
-      _dateDDClickOutside: function() {
-        this._checkDateFilters();
-      },
       _checkDateFilters: function() {
         if (this.$.fromDate.value === '' && this.$.toDate.value === '') {
           this.$.fromDate.value = '';
@@ -159,12 +189,15 @@
         this._filterFrom = this.$.fromDate.value;
         this._filterTo = this.$.toDate.value;
         this.$.ddFilterDate.close();
-        this.fire('filter', {id:this.columnId, value:[new Date(this._filterFrom),new Date(this._filterTo)]});
+        var fromUTC = new Date(this._filterFrom + ' 00:00:00 UTC');
+        var toUTC = new Date(this._filterTo + ' 00:00:00 UTC');
+        toUTC.setTime(toUTC.getTime() + 86400000);
+        this.fire('filter', {id:this.columnId, value:[fromUTC,toUTC]});
       },
       _validateDateInput: function(input) {
         if (input.validate() === false) {
           this.async(function(){input.focus();}.bind(this));
-          input.errorMessage = "Valid date string required";
+          input.errorMessage = 'Expecting: MM/DD/YYYY';
           return false;
         }
         return true;
@@ -184,6 +217,29 @@
         this.$.fromDate.value = this._filterFrom;
         this.$.toDate.value = this._filterTo;
         this.$.ddFilterDate.close();
+      },
+      _selectFromDate: function() {
+        this._showDateDialog(this.$.fromDate, 'from');
+      },
+      _selectToDate: function() {
+        this._showDateDialog(this.$.toDate, 'to');
+      },
+      _showDateDialog: function(dateInput, fid) {
+        var currentDate =  new Date(dateInput.value);
+        this._selectedDate = (isNaN(currentDate.getTime())) ? new Date() : currentDate;
+        this.$.dateDialog.setAttribute('data-field', fid);
+        this.$.dateDialog.open();
+      },
+      _dateDialogClosed: function(e) {
+        var dateStr = this._formatSimpleDate(this._selectedDate);
+        if (this.$.dateDialog.getAttribute('data-field') === 'from') {
+          this.$.fromDate.value = dateStr;
+        } else {
+          this.$.toDate.value = dateStr;
+        }
+      },
+      _formatSimpleDate: function(date) {
+        return (date.getUTCMonth() + 1) + '/' + date.getUTCDate() + '/' + date.getUTCFullYear();
       },
       ready: function() {
         var filterInput = this.querySelector('#filterInput');
