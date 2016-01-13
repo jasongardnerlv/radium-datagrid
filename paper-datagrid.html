@@ -255,6 +255,10 @@ column.
        */
 
       properties: {
+        _columnWidths: {
+          type: Object,
+          value: function(){return {};},
+        },
         /**
          * An array containing the objects that will correspond to each row of the grid
          */
@@ -387,7 +391,6 @@ column.
       ],
       _scroller: null,
       _infiniteScrolling: false,
-      _columnWidths: {},
       _itemsChanged: function(change) {
         if (change.path === 'items' || change.path === 'items.splices') {
           var template = Polymer.dom(this.$.template).getDistributedNodes()[0];
