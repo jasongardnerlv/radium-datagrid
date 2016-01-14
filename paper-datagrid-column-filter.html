@@ -55,6 +55,9 @@
       white-space: nowrap;
       max-width: 100%;
     }
+    #colFilter[data-filter] #ddFilterDate {
+      width: 256px;
+    }
     #colFilter[data-filter] #ddFilterDate paper-material {
       background-color: #FFFFFF;
       min-width: 256px;
@@ -163,6 +166,16 @@
         return ft === type;
       },
       _showDateFilter: function() {
+        this.async(function() {
+          var delta = window.innerWidth -
+                      (parseInt(this.$.ddFilterDate.getComputedStyleValue('left')) +
+                      parseInt(this.$.ddFilterDate.getComputedStyleValue('width')));
+          if (delta < 0) {
+            this.$.ddFilterDate.style.transform = 'translateX(' + delta + 'px)';
+          } else {
+            this.$.ddFilterDate.style.transform = '';
+          }
+        }.bind(this));
         this.$.ddFilterDate.open();
         this.async(function(){this.$.fromDate.focus();}.bind(this));
       },
@@ -197,7 +210,7 @@
       _validateDateInput: function(input) {
         if (input.validate() === false) {
           this.async(function(){input.focus();}.bind(this));
-          input.errorMessage = 'Expecting: MM/DD/YYYY';
+          input.errorMessage = 'Expecting: M/D/YYYY';
           return false;
         }
         return true;
