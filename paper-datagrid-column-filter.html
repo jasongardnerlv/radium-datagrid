@@ -136,7 +136,6 @@
     Polymer({
       is: 'paper-datagrid-column-filter',
       properties: {
-        columnId: String,
         filterType: {
           type: String,
           value: ''
@@ -192,7 +191,7 @@
           this.$.toDate.value = '';
           this._filterFrom = null;
           this._filterTo = null;
-          this.fire('filter', {id:this.columnId, value:null});
+          this.fire('filter', {id:this.domHost.id, value:null});
           this.$.ddFilterDate.close();
           return;
         }
@@ -205,7 +204,7 @@
         var fromUTC = new Date(this._filterFrom + ' 00:00:00 UTC');
         var toUTC = new Date(this._filterTo + ' 00:00:00 UTC');
         toUTC.setTime(toUTC.getTime() + 86400000);
-        this.fire('filter', {id:this.columnId, value:[fromUTC,toUTC]});
+        this.fire('filter', {id:this.domHost.id, value:[fromUTC,toUTC]});
       },
       _validateDateInput: function(input) {
         if (input.validate() === false) {
@@ -258,13 +257,13 @@
         var filterInput = this.querySelector('#filterInput');
         if (filterInput !== null) {
           filterInput.addEventListener('change', function() {
-            this.fire('filter', {id:this.columnId, value:filterInput.value});
+            this.fire('filter', {id:this.domHost.id, value:filterInput.value});
           }.bind(this));
         }
         var filterBox = this.querySelector('#filterMenu paper-listbox');
         if (filterBox !== null) {
           filterBox.addEventListener('iron-select', function(e) {
-            this.fire('filter', {id:this.columnId, value:filterBox.selected - 1});
+            this.fire('filter', {id:this.domHost.id, value:filterBox.selected - 1});
           }.bind(this));
         }
       }
