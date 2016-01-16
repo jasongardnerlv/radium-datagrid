@@ -271,7 +271,7 @@ column.
          */
         items: {
           type: Array,
-          value: function(){return [];}
+          value: function(){return null;}
         },
         /**
          * Which row/column border lines to draw - _horizontal_, _vertical_, or _both_
@@ -416,24 +416,26 @@ column.
               gridDom.removeChild(child);
             }
           }
-          if (this.items.length === 0) {
-            var lblContainer = document.createElement('div');
-            lblContainer.className += 'center-center vertical layout';
-            lblContainer.style.height = '100%';
-            var noItemsLbl = document.createElement('div');
-            noItemsLbl.innerHTML = 'No Records Found';
-            noItemsLbl.className += 'no-items-label';
-            lblContainer.appendChild(noItemsLbl);
-            gridDom.appendChild(lblContainer);
-          } else {
-            for (var i = 0; i < this.items.length; i++) {
-              var itemNode = this.stamp({});
-              itemNode.row = this.items[i];
-              var row = document.createElement('div');
-              row.className += 'row center horizontal layout';
-              row.appendChild(itemNode.root);
-              row.addEventListener('dblclick', this._rowDblClick.bind(this));
-              gridDom.appendChild(row);
+          if (this.items !== null) {
+            if (this.items.length === 0) {
+              var lblContainer = document.createElement('div');
+              lblContainer.className += 'center-center vertical layout';
+              lblContainer.style.height = '100%';
+              var noItemsLbl = document.createElement('div');
+              noItemsLbl.innerHTML = 'No Records Found';
+              noItemsLbl.className += 'no-items-label';
+              lblContainer.appendChild(noItemsLbl);
+              gridDom.appendChild(lblContainer);
+            } else {
+              for (var i = 0; i < this.items.length; i++) {
+                var itemNode = this.stamp({});
+                itemNode.row = this.items[i];
+                var row = document.createElement('div');
+                row.className += 'row center horizontal layout';
+                row.appendChild(itemNode.root);
+                row.addEventListener('dblclick', this._rowDblClick.bind(this));
+                gridDom.appendChild(row);
+              }
             }
           }
           this._hideInfiniteScrollIcon();
