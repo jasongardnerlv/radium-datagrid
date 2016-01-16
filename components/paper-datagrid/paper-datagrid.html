@@ -57,9 +57,16 @@ column.
       height: 56px;
       white-space: nowrap;
     }
-    #dgheader ::content > paper-datagrid-column{
+    #dgheader ::content > paper-datagrid-column {
       line-height: 56px;
       max-height: 56px;
+    }
+    :host ::content .no-items-label {
+      padding: 16px;
+      font-size: 12px;
+      font-weight: 400;
+      font-style: italic;
+      color: rgba(0, 0, 0, 0.54);
     }
     :host([selection-enabled]) ::content .row:hover {
       background-color: #EEEEEE;
@@ -255,6 +262,10 @@ column.
        */
 
       properties: {
+        _columnWidths: {
+          type: Object,
+          value: function(){return {};},
+        },
         /**
          * An array containing the objects that will correspond to each row of the grid
          */
@@ -405,16 +416,28 @@ column.
               gridDom.removeChild(child);
             }
           }
-          for (var i = 0; i < this.items.length; i++) {
-            var itemNode = this.stamp({});
-            itemNode.row = this.items[i];
-            var row = document.createElement('div');
-            row.className += 'row center horizontal layout';
-            row.appendChild(itemNode.root);
-            row.addEventListener('dblclick', this._rowDblClick.bind(this));
-            gridDom.appendChild(row);
+          if (this.items.length === 0) {
+            var lblContainer = document.createElement('div');
+            lblContainer.className += 'center-center vertical layout';
+            lblContainer.style.height = '100%';
+            var noItemsLbl = document.createElement('div');
+            noItemsLbl.innerHTML = 'No Records Found';
+            noItemsLbl.className += 'no-items-label';
+            lblContainer.appendChild(noItemsLbl);
+            gridDom.appendChild(lblContainer);
+          } else {
+            for (var i = 0; i < this.items.length; i++) {
+              var itemNode = this.stamp({});
+              itemNode.row = this.items[i];
+              var row = document.createElement('div');
+              row.className += 'row center horizontal layout';
+              row.appendChild(itemNode.root);
+              row.addEventListener('dblclick', this._rowDblClick.bind(this));
+              gridDom.appendChild(row);
+            }
           }
           this._hideInfiniteScrollIcon();
+          this._applyColumnWidths();
         } else if (change.path.indexOf('items.#') === 0) {
           var path = change.path.substr(7);
           var subpathIdx = path.indexOf('.');
@@ -449,7 +472,7 @@ column.
       _selectionHandler: function(e) {
         if (e.type !== 'keypress' || e.keyCode === 13) {
           var model = this.modelForElement(e.target);
-          if (model) {
+          if (model && model.row) {
             if (!this.desktopMultiSelection) {
               this.toggleSelectionForItem(model.row);
             } else {
@@ -529,32 +552,39 @@ column.
         }
         this.fire('row-dblclick', this.modelForElement(col).row);
       },
-      _resizeCell: function(cell, width) {
-        cell.style['min-width'] = width;
-        cell.style['max-width'] = width;
-        cell.style.flex = 'initial';
+      _applyColumnWidths: function() {
+        Object.keys(this._columnWidths).forEach(function(key) {
+          var rows = Polymer.dom(this.$.dggrid).children;
+          for (var i = 0; i < rows.length; i++) {
+            this._resizeCell(rows[i].children[key], this._columnWidths[key]);
+          }
+        }.bind(this));
       },
-      _resizeColumns: function(row, idx, delta) {
+      _resizeHeaders: function(idx, delta) {
         var minColWidth = 48;
-        var col = row.children[idx];
+        var col = this.$.dgheader.children[idx];
         var colWidth = document.defaultView.getComputedStyle(col, '').getPropertyValue('width');
         var newColWidth = (parseInt(colWidth, 10) - delta);
-        var prev = row.children[idx - 1];
+        var prev = this.$.dgheader.children[idx - 1];
         var prevWidth = document.defaultView.getComputedStyle(prev, '').getPropertyValue('width');
         var newPrevWidth = (parseInt(prevWidth, 10) + delta);
         if (newColWidth > minColWidth && newPrevWidth > minColWidth) {
-          this._resizeCell(col, newColWidth + 'px');
-          this._resizeCell(prev, newPrevWidth + 'px');
+          this._columnWidths[idx] = newColWidth;
+          this._columnWidths[idx-1] = newPrevWidth;
+          this._resizeCell(col, newColWidth);
+          this._resizeCell(prev, newPrevWidth);
         }
+      },
+      _resizeCell: function(cell, width) {
+        cell.style['min-width'] = width + 'px';
+        cell.style['max-width'] = width + 'px';
+        cell.style.flex = 'initial';
       },
       _columnResize: function(e) {
         var idx = e.detail.idx;
         var delta = e.detail.delta;
-        this._resizeColumns(this.$.dgheader, idx, delta);
-        var rows = Polymer.dom(this.$.dggrid).children;
-        for (var i = 0; i < rows.length; i++) {
-          this._resizeColumns(rows[i], idx, delta);
-        }
+        this._resizeHeaders(idx, delta);
+        this._applyColumnWidths();
       },
       _getColumnHeaderById: function(colId) {
         for (var i = 0; i < this.$.dgheader.children.length; i++) {

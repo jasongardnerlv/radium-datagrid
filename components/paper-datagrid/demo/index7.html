@@ -11,12 +11,15 @@
   <link rel="import" href="../../paper-button/paper-button.html">
   <link rel="import" href="../paper-datagrid.html">
   <style is="custom-style">
+    :root {
+      --default-primary-color: #0072BC;
+    }
     body {
       font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
     #gridExample {
-      min-width: 480px;
-      max-width: 480px;
+      min-width: 720px;
+      max-width: 720px;
       border: 1px solid #DDDDDD;
       background-color: #FFFFFF;
     }
@@ -31,20 +34,21 @@
 <body unresolved>
   <template is="dom-bind" id="app">
     <h3>paper-datagrid example (column filters)</h3>
-    <div class="horizontal layout">
+    <div class="vertical layout">
+      <div class="vertical layout">
+        <paper-button class="demo-button" raised on-click="_toggleFilters">Filters shown: <span>[[_showFilters]]</span></paper-button>
+      </div>
       <div id="gridExample">
         <paper-datagrid id="grid" items="[[_appliedItems]]" filters-enabled="[[_showFilters]]" on-filter="_filterChanged">
           <template>
             <paper-datagrid-column id="icon" column-width="72px"><iron-icon icon="[[row.icon]]"></iron-icon></paper-datagrid-column>
-            <paper-datagrid-column id="foo" header="Foo" filterable><span>[[row.foo]]</span></paper-datagrid-column>
-            <paper-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></paper-datagrid-column>
-            <paper-datagrid-column id="baz" header="Baz" filterable><span>[[row.baz]]</span></paper-datagrid-column>
-            <paper-datagrid-column id="status" header="Status" filterable filter-options="[[_statusArr]]"><span>[[_getStatusLabel(row.status, _statusArr)]]</span></paper-datagrid-column>
+            <paper-datagrid-column id="foo" column-width="72px" header="Foo" filter-type="text"><span>[[row.foo]]</span></paper-datagrid-column>
+            <paper-datagrid-column id="bar" column-width="72px" header="Bar"><span>[[row.bar]]</span></paper-datagrid-column>
+            <paper-datagrid-column id="baz" column-width="72px" header="Baz" filter-type="text"><span>[[row.baz]]</span></paper-datagrid-column>
+            <paper-datagrid-column id="thedate" header="Date" filter-type="date"><span>[[_formatDate(row.thedate)]]</span></paper-datagrid-column>
+            <paper-datagrid-column id="status" column-width="120px" header="Status" filter-type="options" filter-options="[[_statusArr]]"><span>[[_getStatusLabel(row.status, _statusArr)]]</span></paper-datagrid-column>
           </template>
         </paper-datagrid>
-      </div>
-      <div class="vertical layout">
-        <paper-button class="demo-button" raised on-click="_toggleFilters">Filters shown: <span>[[_showFilters]]</span></paper-button>
       </div>
     </div>
   </template>
@@ -54,7 +58,8 @@
       app._statusArr = ['Good','Fair','Bad'];
       app._genFakeData = function() {
         var data = [];
-        for (var i=0;i<260;i++) {
+        var currentDate = new Date().getTime();
+        for (var i=0;i<26;i++) {
           var a = Math.floor(65 + (i / 26));
           var b = 65 + (i % 26);
           var firstChar = String.fromCharCode(a);
@@ -63,6 +68,7 @@
             foo: firstChar + secondChar + firstChar + secondChar,
             bar: secondChar + firstChar + secondChar + firstChar,
             baz: a.toString() + b.toString(),
+            thedate: new Date(currentDate - (i * 28800000)),
             status: i % 3,
             icon:'polymer'
           });
@@ -79,6 +85,9 @@
             if (prop === 'status') {
               return (app._currentFilters[prop] === -1 ||
                 obj[prop] === app._currentFilters[prop]);
+            } else if (prop === 'thedate') {
+                return (app._currentFilters[prop] === null ||
+                obj[prop] >= app._currentFilters[prop][0] && obj[prop] <= app._currentFilters[prop][1]);
             } else {
               return (app._currentFilters[prop] === '' ||
                 obj[prop].toLowerCase().indexOf(app._currentFilters[prop].toLowerCase()) >= 0);
@@ -93,6 +102,9 @@
       };
       app._getStatusLabel = function(status, items) {
         return items[status];
+      };
+      app._formatDate = function(date) {
+        return date.toUTCString();
       };
       app._initialItems = app._genFakeData();
       app._appliedItems = app._initialItems;

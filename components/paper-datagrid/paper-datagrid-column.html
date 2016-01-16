@@ -1,10 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
-<link rel="import" href="../paper-input/paper-input.html">
-<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
-<link rel="import" href="../paper-listbox/paper-listbox.html">
-<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="paper-datagrid-column-filter.html">
 <dom-module id="paper-datagrid-column">
   <style is="custom-style">
     :host {
@@ -30,6 +27,8 @@
       width: calc(100% - 24px);
       margin-left: 8px;
       margin-right: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     #dgcolumn > ::content #colHeader {
       font-size: 12px;
@@ -81,37 +80,6 @@
       display: inline-block;
       color: rgba(0, 0, 0, 0.87);
     }
-    #dgcolumn > ::content #colFilter {
-      display: none;
-      height: 24px;
-      line-height: 24px;
-    }
-    #dgcolumn > ::content paper-dropdown-menu {
-      display: block;
-    }
-    #dgcolumn > ::content #colFilter #filterInput {
-      display: none;
-      pointer-events: none;
-    }
-    #dgcolumn > ::content #colFilter[data-filter] #filterInput {
-      display: initial;
-      pointer-events: initial;
-    }
-    #dgcolumn > ::content #colFilter[data-filter] #filterPH {
-      display: none;
-    }
-    #dgcolumn > ::content paper-input-container {
-      line-height: 16px;
-      padding: 0px;
-    }
-    #dgcolumn > ::content paper-input-container input {
-      font-size: 12px;
-      line-height: 16px;
-    }
-    #dgcolumn > ::content paper-input-container iron-icon {
-      width: 16px;
-      height: 16px;
-    }
   </style>
   <template>
     <div class="splitter">&nbsp;</div><!--
@@ -123,18 +91,7 @@
         <iron-icon icon="arrow-forward"></iron-icon>
         <div>[[header]]</div>
       </div>
-      <div id="colFilter" data-filter$="[[filterable]]">
-        <paper-input id="filterInput" no-label-float hidden$="[[_showFilterOptions]]"></paper-input>
-        <paper-dropdown-menu id="filterMenu" no-label-float hidden$="[[!_showFilterOptions]]" horizontal-align="left">
-          <paper-listbox class="dropdown-content">
-            <paper-item>&nbsp;</paper-item>
-            <template is="dom-repeat" items="[[filterOptions]]">
-              <paper-item>[[item]]</paper-item>
-            </template>
-          </paper-listbox>
-        </paper-dropdown-menu>
-        <div id="filterPH">&nbsp;</div>
-      </div>
+      <paper-datagrid-column-filter filter-type="[[filterType]]" filter-options="[[filterOptions]]"></paper-datagrid-column-filter>
     </template>
   </template>
 </dom-module>
@@ -183,10 +140,7 @@
           type: Boolean,
           value: false
         },
-        filterable: {
-          type: Boolean,
-          value: false
-        },
+        filterType: String,
         filterOptions: {
           type: Array,
           value: null
@@ -198,7 +152,7 @@
         _headerClasses: String,
         _headerStyle: String,
         _model: Object,
-        _showFilterOptions: Boolean
+        _filterType: String
       },
       behaviors: [Polymer.Templatizer],
       observers: [
@@ -352,18 +306,6 @@
           window.addEventListener('mousemove', this._boundColumnDragHandler);
           window.addEventListener('mouseup', this._boundColumnDragEndHandler);
         }.bind(this));
-        var filterInput = this.querySelector('#filterInput');
-        if (filterInput !== null) {
-          filterInput.addEventListener('change', function() {
-            this.fire('filter', {id:this.id, value:filterInput.value});
-          }.bind(this));
-        }
-        var filterBox = this.querySelector('#filterMenu paper-listbox');
-        if (filterBox !== null) {
-          filterBox.addEventListener('iron-select', function(e) {
-            this.fire('filter', {id:this.id, value:filterBox.selected - 1});
-          }.bind(this));
-        }
       },
     });
   })();
