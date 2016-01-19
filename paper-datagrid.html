@@ -182,7 +182,7 @@ column.
       <template is="dom-if" if="[[enablePaging]]">
         <div id="dgfooter" class="center horizontal layout">
           <div class="flex"></div>
-          <span>[[perPageLabel]]</span>
+          <span>[[_computedTranslate(i18nFunction,'ROWS_PER_PAGE','Rows per page:')]]</span>
           <span id="perPage">[[itemsPerPage]]</span>
           <div>
             <paper-icon-button id="perPageArrow" icon="arrow-drop-down" noink on-click="_showPageOpts"></paper-icon-button>
@@ -196,7 +196,7 @@ column.
               </paper-material>
             </iron-dropdown>
           </div>
-          <span id="pages">[[_calcPaging(currentPage,itemsPerPage,totalItems,pageCountLabel)]]</span>
+          <span id="pages">[[_calcPaging(currentPage,itemsPerPage,totalItems,i18nFunction)]]</span>
           <paper-icon-button icon="datagrid:first-page" on-click="_firstPage"></paper-icon-button>
           <paper-icon-button icon="datagrid:prev-page" on-click="_prevPage"></paper-icon-button>
           <paper-icon-button icon="datagrid:next-page" on-click="_nextPage"></paper-icon-button>
@@ -267,6 +267,15 @@ column.
           value: function(){return {};},
         },
         /**
+         * Function invoked for string translations.
+         * First arg passed is the string key to be translated.
+         * Second arg is an array used in the format string. (printf-ish)
+         */
+        i18nFunction: {
+          type: Function,
+          value: null
+        },
+        /**
          * An array containing the objects that will correspond to each row of the grid
          */
         items: {
@@ -314,21 +323,6 @@ column.
         perPageOptions: {
           type: Array,
           value: function() { return []; }
-        },
-        /**
-         * Label to use for indicating the page information, when paging.  Allows for language translation, providing
-         * value substitution - `{1}-{2} of {3}`
-         */
-        pageCountLabel: {
-          type: String,
-          value: '{1}-{2} of {3}'
-        },
-        /**
-         * Label to use for the page options dropdown, when paging.  Allows for language translation
-         */
-        perPageLabel: {
-          type: String,
-          value: 'Rows per page:'
         },
         /**
          * Whether or not row selection is enabled
@@ -422,7 +416,7 @@ column.
               lblContainer.className += 'center-center vertical layout';
               lblContainer.style.height = '100%';
               var noItemsLbl = document.createElement('div');
-              noItemsLbl.innerHTML = 'No Records Found';
+              noItemsLbl.innerHTML = this._translate('NO_RECORDS_FOUND', 'No Records Found');
               noItemsLbl.className += 'no-items-label';
               lblContainer.appendChild(noItemsLbl);
               gridDom.appendChild(lblContainer);
@@ -605,11 +599,12 @@ column.
           }
         }
       },
-      _calcPaging: function(cp, pp, ttl, pcl) {
+      _calcPaging: function(cp, pp, ttl, i18n) {
         var sIdx = ((cp - 1) * pp) + 1;
         var eIdx = (sIdx + pp) - 1;
         eIdx = (eIdx < ttl) ? eIdx : ttl;
         var args = [null,sIdx,eIdx,ttl];
+        var pcl = this._translate(i18n, 'CURRENT_PAGE_LABEL', '{1}-{2} of {3}');
         return pcl.replace(/{(\d+)}/g, function(match, number) {
           return typeof args[number] != 'undefined' ? args[number] : match;
         });
@@ -658,6 +653,16 @@ column.
           this._setGridHeight();
         }
         this._infiniteScrolling = false;
+      },
+      _computedTranslate: function(i18n, key, defaultVal, interp) {
+        this._translate(key, defaultVal, interp);
+      },
+      _translate: function(key, defaultVal, interp) {
+        if (this.i18nFunction) {
+          return this.i18nFunction(key, interp);
+        } else {
+          return defaultVal;
+        }
       },
       /**
        * Have the column headers reflect the initial sort

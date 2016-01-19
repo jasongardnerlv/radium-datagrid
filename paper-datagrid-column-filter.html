@@ -102,21 +102,21 @@
         </paper-listbox>
       </paper-dropdown-menu>
       <paper-button id="btnFilterDate" hidden$="[[!_showFilter(filterType, 'date')]]" on-tap="_showDateFilter"
-          title$="[[_getButtonLabel(_filterFrom,_filterTo)]]">[[_getButtonLabel(_filterFrom,_filterTo)]]</paper-button>
+          title$="[[_getButtonLabel(_gridRef,_filterFrom,_filterTo)]]">[[_getButtonLabel(_gridRef,_filterFrom,_filterTo)]]</paper-button>
       <iron-dropdown id="ddFilterDate" on-iron-overlay-canceled="_checkDateFilters" no-cancel-on-esc-key>
         <paper-material class="dropdown-content" on-keydown="_dateDDKeyPress" >
           <div class="end horizontal layout">
-            <paper-input id="fromDate" label="From" required validator="datevalidator"></paper-input>
+            <paper-input id="fromDate" label="[[_computedTranslate(_gridRef, 'FROM', 'From')]]" required validator="datevalidator"></paper-input>
             <paper-icon-button on-tap="_selectFromDate" icon="event"></paper-icon-button>
           </div>
           <div class="end horizontal layout">
-            <paper-input id="toDate" label="To" required validator="datevalidator"></paper-input>
+            <paper-input id="toDate" label="[[_computedTranslate(_gridRef, 'TO', 'To')]]" required validator="datevalidator"></paper-input>
             <paper-icon-button on-tap="_selectToDate" icon="event"></paper-icon-button>
           </div>
           <div id="ddButtons">
-            <paper-button on-tap="_clearDateFields">Clear</paper-button>
-            <paper-button on-tap="_cancelDateEdits">Cancel</paper-button>
-            <paper-button on-tap="_checkDateFilters">OK</paper-button>
+            <paper-button on-tap="_clearDateFields">[[_computedTranslate(_gridRef, 'CLEAR', 'Clear')]]</paper-button>
+            <paper-button on-tap="_cancelDateEdits">[[_computedTranslate(_gridRef, 'CANCEL', 'Cancel')]]</paper-button>
+            <paper-button on-tap="_checkDateFilters">[[_computedTranslate(_gridRef, 'OK', 'OK')]]</paper-button>
           </div>
         </paper-material>
       </iron-dropdown>
@@ -125,8 +125,8 @@
     <paper-dialog id="dateDialog" class="paper-date-picker-dialog" modal on-iron-overlay-closed="_dateDialogClosed">
       <paper-date-picker date="{{_selectedDate}}"></paper-date-picker>
       <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm>OK</paper-button>
+        <paper-button dialog-dismiss>[[_computedTranslate(_gridRef, 'CANCEL', 'Cancel')]]</paper-button>
+        <paper-button dialog-confirm>[[_computedTranslate(_gridRef, 'OK', 'OK')]]</paper-button>
       </div>
     </paper-dialog>
   </template>
@@ -156,6 +156,10 @@
           type: Date,
           notify: true,
           value: new Date()
+        },
+        _gridRef: {
+          type: Object,
+          value: null
         }
       },
       _filtersEnabled: function(ft) {
@@ -209,14 +213,14 @@
       _validateDateInput: function(input) {
         if (input.validate() === false) {
           this.async(function(){input.focus();}.bind(this));
-          input.errorMessage = 'Expecting: M/D/YYYY';
+          input.errorMessage = this._translate('EXPECTING', 'Expecting') + ': M/D/YYYY';
           return false;
         }
         return true;
       },
-      _getButtonLabel: function(df, dt) {
+      _getButtonLabel: function(grid, df, dt) {
         if (!df || !dt) {
-          return '<Select Dates>';
+          return '<' + this._computedTranslate(grid, 'SELECT_DATES', 'Select Dates') + '>';
         } else {
           return df + ' - ' + dt;
         }
@@ -253,7 +257,18 @@
       _formatSimpleDate: function(date) {
         return (date.getUTCMonth() + 1) + '/' + date.getUTCDate() + '/' + date.getUTCFullYear();
       },
+      _computedTranslate: function(grid, key, defaultVal) {
+        if (grid !== null) {
+          return this._translate(key, defaultVal);
+        }
+      },
+      _translate: function(key, defaultVal) {
+        return this._gridRef._translate(key, defaultVal);
+      },
       ready: function() {
+        this.async(function() {
+          this._gridRef = this.domHost.domHost;
+        }.bind(this));
         var filterInput = this.querySelector('#filterInput');
         if (filterInput !== null) {
           filterInput.addEventListener('change', function() {
