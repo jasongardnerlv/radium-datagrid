@@ -604,7 +604,7 @@ column.
         var eIdx = (sIdx + pp) - 1;
         eIdx = (eIdx < ttl) ? eIdx : ttl;
         var args = [null,sIdx,eIdx,ttl];
-        var pcl = this._translate(i18n, 'CURRENT_PAGE_LABEL', '{1}-{2} of {3}');
+        var pcl = this._computedTranslate(i18n, 'CURRENT_PAGE_LABEL', '{1}-{2} of {3}');
         return pcl.replace(/{(\d+)}/g, function(match, number) {
           return typeof args[number] != 'undefined' ? args[number] : match;
         });
@@ -655,7 +655,7 @@ column.
         this._infiniteScrolling = false;
       },
       _computedTranslate: function(i18n, key, defaultVal, interp) {
-        this._translate(key, defaultVal, interp);
+        return this._translate(key, defaultVal, interp);
       },
       _translate: function(key, defaultVal, interp) {
         if (this.i18nFunction) {
