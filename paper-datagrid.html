@@ -268,8 +268,7 @@ column.
         },
         /**
          * Function invoked for string translations.
-         * First arg passed is the string key to be translated.
-         * Second arg is an array used in the format string. (printf-ish)
+         * The first arg is the string key to be translated.
          */
         i18nFunction: {
           type: Function,
@@ -654,12 +653,12 @@ column.
         }
         this._infiniteScrolling = false;
       },
-      _computedTranslate: function(i18n, key, defaultVal, interp) {
-        return this._translate(key, defaultVal, interp);
+      _computedTranslate: function(i18n, key, defaultVal) {
+        return this._translate(key, defaultVal);
       },
-      _translate: function(key, defaultVal, interp) {
+      _translate: function(key, defaultVal) {
         if (this.i18nFunction) {
-          return this.i18nFunction(key, interp);
+          return this.i18nFunction(key);
         } else {
           return defaultVal;
         }
