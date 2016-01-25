@@ -241,8 +241,11 @@
         this._showDateDialog(this.$.toDate, 'to');
       },
       _showDateDialog: function(dateInput, fid) {
-        var currentDate =  new Date(dateInput.value);
-        this._selectedDate = (isNaN(currentDate.getTime())) ? new Date() : currentDate;
+        var currentDate;
+        if (dateInput.value) {
+          currentDate = new Date(dateInput.value);
+        }
+        this._selectedDate = (currentDate && !isNaN(currentDate.getTime())) ? currentDate : new Date();
         this.$.dateDialog.setAttribute('data-field', fid);
         this.$.dateDialog.open();
       },
