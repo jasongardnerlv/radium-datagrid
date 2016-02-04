@@ -7,7 +7,7 @@
 <link rel="import" href="../paper-material/paper-material.html">
 <link rel="import" href="../paper-item/paper-item.html">
 <link rel="import" href="datagrid-icons.html">
-<link rel="import" href="paper-datagrid-column.html">
+<link rel="import" href="radium-datagrid-column.html">
 
 <!--
 A Material Design inspired data grid element for Polymer.js apps.
@@ -20,18 +20,18 @@ deviations or extrapolations, as features that are not included in the specifica
 
 ### Simple Example:
 
-    <paper-datagrid items="[[_myItems]]">
+    <radium-datagrid items="[[_myItems]]">
       <template>
-        <paper-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></paper-datagrid-column>
-        <paper-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></paper-datagrid-column>
-        <paper-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></paper-datagrid-column>
+        <radium-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></radium-datagrid-column>
+        <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
+        <radium-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></radium-datagrid-column>
       </template>
-    </paper-datagrid>
+    </radium-datagrid>
 
 A row will be rendered for each item of the collection, and the _row_ property will be available for the template of each
 column.
 
-@element paper-datagrid
+@element radium-datagrid
 @demo demo/index.html Basic configurations
 @demo demo/index2.html Paging footer
 @demo demo/index3.html Item selection
@@ -40,7 +40,7 @@ column.
 @demo demo/index6.html Infinite scroll 2
 @demo demo/index7.html Column Filtering
 -->
-<dom-module id="paper-datagrid">
+<dom-module id="radium-datagrid">
   <style is="custom-style">
     :host {
       -moz-user-select     : none;
@@ -57,7 +57,7 @@ column.
       height: 56px;
       white-space: nowrap;
     }
-    #dgheader ::content > paper-datagrid-column {
+    #dgheader ::content > radium-datagrid-column {
       line-height: 56px;
       max-height: 56px;
     }
@@ -74,37 +74,37 @@ column.
     :host([selection-enabled]) ::content .row.header:hover {
       background-color: initial;
     }
-    :host ::content .row paper-datagrid-column:first-of-type .splitter {
+    :host ::content .row radium-datagrid-column:first-of-type .splitter {
       display: none;
     }
-    :host ::content .row paper-datagrid-column:first-of-type #dgcolumn {
+    :host ::content .row radium-datagrid-column:first-of-type #dgcolumn {
       margin-left: 24px;
       width: calc(100% - 36px);
     }
-    :host ::content .row paper-datagrid-column:last-of-type #dgcolumn {
+    :host ::content .row radium-datagrid-column:last-of-type #dgcolumn {
       margin-right: 24px;
       width: calc(100% - 36px);
     }
-    :host ::content .row paper-datagrid-column:only-child #dgcolumn {
+    :host ::content .row radium-datagrid-column:only-child #dgcolumn {
       width: calc(100% - 48px);
     }
-    :host ::content .hztl-lines paper-datagrid-column {
+    :host ::content .hztl-lines radium-datagrid-column {
       border-bottom-style: solid;
       border-bottom-width: 1px;
       border-bottom-color: var(--grid-line-color,#DDDDDD);
     }
-    :host ::content .vert-lines paper-datagrid-column {
+    :host ::content .vert-lines radium-datagrid-column {
       border-right-style: solid;
       border-right-width: 1px;
       border-right-color: var(--grid-line-color,#DDDDDD);
     }
-    :host ::content .vert-lines paper-datagrid-column:last-of-type {
+    :host ::content .vert-lines radium-datagrid-column:last-of-type {
       border-right: none;
     }
-    :host([filters-enabled]) ::content paper-datagrid-column #colHeader {
+    :host([filters-enabled]) ::content radium-datagrid-column #colHeader {
       height: 32px;
     }
-    :host([filters-enabled]) ::content paper-datagrid-column #colFilter {
+    :host([filters-enabled]) ::content radium-datagrid-column #colFilter {
       display: block !important;
     }
     #dgfooter {
@@ -182,7 +182,7 @@ column.
       <template is="dom-if" if="[[enablePaging]]">
         <div id="dgfooter" class="center horizontal layout">
           <div class="flex"></div>
-          <span>[[perPageLabel]]</span>
+          <span>[[_computedTranslate(i18nFunction,'ROWS_PER_PAGE','Rows per page:')]]</span>
           <span id="perPage">[[itemsPerPage]]</span>
           <div>
             <paper-icon-button id="perPageArrow" icon="arrow-drop-down" noink on-click="_showPageOpts"></paper-icon-button>
@@ -196,7 +196,7 @@ column.
               </paper-material>
             </iron-dropdown>
           </div>
-          <span id="pages">[[_calcPaging(currentPage,itemsPerPage,totalItems,pageCountLabel)]]</span>
+          <span id="pages">[[_calcPaging(currentPage,itemsPerPage,totalItems,i18nFunction)]]</span>
           <paper-icon-button icon="datagrid:first-page" on-click="_firstPage"></paper-icon-button>
           <paper-icon-button icon="datagrid:prev-page" on-click="_prevPage"></paper-icon-button>
           <paper-icon-button icon="datagrid:next-page" on-click="_nextPage"></paper-icon-button>
@@ -211,7 +211,7 @@ column.
 <script>
   (function() {
     Polymer({
-      is: 'paper-datagrid',
+      is: 'radium-datagrid',
 
       /*
        * A column is being sorted
@@ -267,6 +267,14 @@ column.
           value: function(){return {};},
         },
         /**
+         * Function invoked for string translations.
+         * The first arg is the string key to be translated.
+         */
+        i18nFunction: {
+          type: Function,
+          value: null
+        },
+        /**
          * An array containing the objects that will correspond to each row of the grid
          */
         items: {
@@ -314,21 +322,6 @@ column.
         perPageOptions: {
           type: Array,
           value: function() { return []; }
-        },
-        /**
-         * Label to use for indicating the page information, when paging.  Allows for language translation, providing
-         * value substitution - `{1}-{2} of {3}`
-         */
-        pageCountLabel: {
-          type: String,
-          value: '{1}-{2} of {3}'
-        },
-        /**
-         * Label to use for the page options dropdown, when paging.  Allows for language translation
-         */
-        perPageLabel: {
-          type: String,
-          value: 'Rows per page:'
         },
         /**
          * Whether or not row selection is enabled
@@ -422,7 +415,7 @@ column.
               lblContainer.className += 'center-center vertical layout';
               lblContainer.style.height = '100%';
               var noItemsLbl = document.createElement('div');
-              noItemsLbl.innerHTML = 'No Records Found';
+              noItemsLbl.innerHTML = this._translate('NO_RECORDS_FOUND', 'No Records Found');
               noItemsLbl.className += 'no-items-label';
               lblContainer.appendChild(noItemsLbl);
               gridDom.appendChild(lblContainer);
@@ -546,7 +539,7 @@ column.
         var col;
         var el = e.target;
         while (col === undefined) {
-          if (el.nodeName.toLowerCase() === 'paper-datagrid-column') {
+          if (el.nodeName.toLowerCase() === 'radium-datagrid-column') {
             col = el
           } else {
             el = el.parentNode;
@@ -599,17 +592,18 @@ column.
       },
       _forwardParentProp: function(prop, value) {
         if (prop !== 'row') {
-          var columns = this.querySelectorAll('paper-datagrid-column');
+          var columns = this.querySelectorAll('radium-datagrid-column');
           for (var i = 0; i < columns.length; i++) {
             columns[i]._templateInstance[prop] = value;
           }
         }
       },
-      _calcPaging: function(cp, pp, ttl, pcl) {
+      _calcPaging: function(cp, pp, ttl, i18n) {
         var sIdx = ((cp - 1) * pp) + 1;
         var eIdx = (sIdx + pp) - 1;
         eIdx = (eIdx < ttl) ? eIdx : ttl;
         var args = [null,sIdx,eIdx,ttl];
+        var pcl = this._computedTranslate(i18n, 'CURRENT_PAGE_LABEL', '{1}-{2} of {3}');
         return pcl.replace(/{(\d+)}/g, function(match, number) {
           return typeof args[number] != 'undefined' ? args[number] : match;
         });
@@ -658,6 +652,16 @@ column.
           this._setGridHeight();
         }
         this._infiniteScrolling = false;
+      },
+      _computedTranslate: function(i18n, key, defaultVal) {
+        return this._translate(key, defaultVal);
+      },
+      _translate: function(key, defaultVal) {
+        if (this.i18nFunction) {
+          return this.i18nFunction(key);
+        } else {
+          return defaultVal;
+        }
       },
       /**
        * Have the column headers reflect the initial sort
