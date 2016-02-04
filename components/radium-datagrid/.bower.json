@@ -42,9 +42,9 @@
   "_resolution": {
     "type": "version",
     "tag": "v0.0.1",
-    "commit": "77f503d3c8d912702103cfc8862d523ecf584c7b"
+    "commit": "22095fbe233fb4c5b0c5aacbc182929e69495197"
   },
-  "_source": "git://github.com/jasongardnerlv/paper-datagrid.git",
+  "_source": "git://github.com/jasongardnerlv/radium-datagrid.git",
   "_target": "*",
-  "_originalSource": "jasongardnerlv/paper-datagrid"
+  "_originalSource": "jasongardnerlv/radium-datagrid"
 }

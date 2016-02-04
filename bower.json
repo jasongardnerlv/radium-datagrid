@@ -1,5 +1,5 @@
 {
-  "name": "paper-datagrid",
+  "name": "radium-datagrid",
   "version": "0.0.1",
   "description": "Material Design inspired data grid component",
   "authors": [
@@ -11,16 +11,16 @@
     "datatable"
   ],
   "main": [
-    "paper-datagrid.html",
-    "paper-datagrid-column.html"
+    "radium-datagrid.html",
+    "radium-datagrid-column.html"
   ],
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git://github.com/jasongardnerlv/paper-datagrid.git"
+    "url": "git://github.com/jasongardnerlv/radium-datagrid.git"
   },
   "license": "MIT",
-  "homepage": "https://github.com/jasongardnerlv/paper-datagrid",
+  "homepage": "https://github.com/jasongardnerlv/radium-datagrid",
   "ignore": [
     "**/.*",
     "node_modules",
@@ -45,7 +45,7 @@
     "paper-material": "PolymerElements/paper-material#^1.0.4",
     "paper-styles": "PolymerElements/paper-styles#^1.0.13",
     "paper-date-picker": "jasongardnerlv/paper-date-picker#master",
-    "paper-datagrid": "jasongardnerlv/paper-datagrid"
+    "radium-datagrid": "jasongardnerlv/radium-datagrid"
   },
   "devDependencies": {
     "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0",
