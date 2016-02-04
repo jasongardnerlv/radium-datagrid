@@ -1,8 +1,8 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
-<link rel="import" href="paper-datagrid-column-filter.html">
-<dom-module id="paper-datagrid-column">
+<link rel="import" href="radium-datagrid-column-filter.html">
+<dom-module id="radium-datagrid-column">
   <style is="custom-style">
     :host {
       line-height: 48px;
@@ -91,14 +91,14 @@
         <iron-icon icon="arrow-forward"></iron-icon>
         <div>[[header]]</div>
       </div>
-      <paper-datagrid-column-filter filter-type="[[filterType]]" filter-options="[[filterOptions]]"></paper-datagrid-column-filter>
+      <radium-datagrid-column-filter filter-type="[[filterType]]" filter-options="[[filterOptions]]"></radium-datagrid-column-filter>
     </template>
   </template>
 </dom-module>
 <script>
   (function() {
     Polymer({
-      is: 'paper-datagrid-column',
+      is: 'radium-datagrid-column',
       properties: {
         _sortDirection: {
           type:String,

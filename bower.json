@@ -1,26 +1,28 @@
 {
-  "name": "paper-datagrid",
+  "name": "radium-datagrid",
   "version": "0.0.2",
   "description": "Material Design inspired data grid component",
   "authors": [
     "jason gardner <jason.gardner.lv@gmail.com>"
   ],
   "keywords": [
+    "radium",
+    "polymer",
     "paper",
     "datagrid",
     "datatable"
   ],
   "main": [
-    "paper-datagrid.html",
-    "paper-datagrid-column.html"
+    "radium-datagrid.html",
+    "radium-datagrid-column.html"
   ],
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git://github.com/jasongardnerlv/paper-datagrid.git"
+    "url": "git://github.com/jasongardnerlv/radium-datagrid.git"
   },
   "license": "MIT",
-  "homepage": "https://github.com/jasongardnerlv/paper-datagrid",
+  "homepage": "https://github.com/jasongardnerlv/radium-datagrid",
   "ignore": [],
   "dependencies": {
     "polymer": "Polymer/polymer#^1.2.0",
