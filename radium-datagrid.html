@@ -469,8 +469,12 @@ column.
           var model = this.modelForElement(e.target);
           if (model && model.row) {
             if (!this.desktopMultiSelection) {
-              if (this.selectedItem !== model.row) {
-                this.selectItem(model.row);
+              if (multiSelection) {
+                this.toggleSelectionForItem(model.row);
+              } else {
+                if (this.selectedItem !== model.row) {
+                  this.selectItem(model.row);
+                }
               }
             } else {
               this._desktopMultiSelect(e.detail.sourceEvent, model.row);
