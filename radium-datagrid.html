@@ -469,7 +469,7 @@ column.
           var model = this.modelForElement(e.target);
           if (model && model.row) {
             if (!this.desktopMultiSelection) {
-              if (multiSelection) {
+              if (this.multiSelection) {
                 this.toggleSelectionForItem(model.row);
               } else {
                 if (this.selectedItem !== model.row) {
