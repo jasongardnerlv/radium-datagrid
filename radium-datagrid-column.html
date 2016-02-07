@@ -297,14 +297,18 @@
         }
       },
       ready: function() {
-        this._boundColumnDragHandler = this._onColumnDrag.bind(this);
-        this._boundColumnDragEndHandler = this._onColumnEndDrag.bind(this);
-        var splitter = this.querySelector('.splitter');
-        splitter.addEventListener('mousedown', function(e) {
-          e.preventDefault();
-          this._colDragX = e.clientX;
-          window.addEventListener('mousemove', this._boundColumnDragHandler);
-          window.addEventListener('mouseup', this._boundColumnDragEndHandler);
+        this.async(function() {
+          if (this.domHost.disableColumnResize === false) {
+            this._boundColumnDragHandler = this._onColumnDrag.bind(this);
+            this._boundColumnDragEndHandler = this._onColumnEndDrag.bind(this);
+            var splitter = this.querySelector('.splitter');
+            splitter.addEventListener('mousedown', function(e) {
+              e.preventDefault();
+              this._colDragX = e.clientX;
+              window.addEventListener('mousemove', this._boundColumnDragHandler);
+              window.addEventListener('mouseup', this._boundColumnDragEndHandler);
+            }.bind(this));
+          }
         }.bind(this));
       },
     });
