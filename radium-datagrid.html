@@ -146,10 +146,13 @@ column.
     #optionsDropdown paper-item.iron-selected {
       font-weight: initial;
     }
-    #infScrollIcon {
+    #gridLoadingIcon {
+      height: 100%;
+    }
+    .loadingIcon {
       height: 56px;
     }
-    #infScrollIcon iron-icon {
+    .loadingIcon iron-icon {
       color: rgba(0, 0, 0, 0.4);
       -webkit-animation: icon-spin 1s infinite linear;
       animation: icon-spin 1s infinite linear;
@@ -181,7 +184,9 @@ column.
     </array-selector>
     <div id="dgwrapper">
       <div id="dgheader" class="header row center horizontal layout"></div>
-      <div id="dggrid"></div>
+      <div id="dggrid">
+        <div id="gridLoadingIcon" class="loadingIcon layout horizontal center-center" hidden$="[[!_gridLoading]]"><iron-icon icon="refresh"></iron-icon></div>
+      </div>
       <template is="dom-if" if="[[enablePaging]]">
         <div id="dgfooter" class="center horizontal layout">
           <div class="flex"></div>
@@ -206,7 +211,7 @@ column.
           <paper-icon-button icon="datagrid:last-page" on-click="_lastPage"></paper-icon-button>
         </div>
       </template>
-      <div id="infScrollIcon" class="layout horizontal center-center" hidden$="[[!_infiniteScrolling]]"><iron-icon icon="refresh"></iron-icon></div>
+      <div class="loadingIcon layout horizontal center-center" hidden$="[[!_infiniteScrolling]]"><iron-icon icon="refresh"></iron-icon></div>
     </div>
     <content id="template" select="template"></content>
   </template>
@@ -406,7 +411,9 @@ column.
       ],
       _scroller: null,
       _infiniteScrolling: false,
+      _gridLoading: false,
       _itemsChanged: function(change) {
+        this._gridLoading = false;
         if (change.path === 'items' || change.path === 'items.splices') {
           var template = Polymer.dom(this.$.template).getDistributedNodes()[0];
           if (!this.ctor) {
@@ -420,7 +427,7 @@ column.
           var gridDom = Polymer.dom(this.$.dggrid);
           for (var c = gridDom.childNodes.length - 1; c >= 0; c--) {
             var child = gridDom.childNodes[c];
-            if (child.className.indexOf('header') < 0) {
+            if (child.nodeType === 1 && child.className.indexOf('row') >= 0 && child.className.indexOf('header') < 0) {
               gridDom.removeChild(child);
             }
           }
@@ -776,6 +783,15 @@ column.
        */
       infiniteScrollDone: function() {
         this._hideInfiniteScrollIcon();
+      },
+      /**
+       * Clears the current items and shows a loading spinner.  Clear this by setting the items property to an array
+       *
+       * @method showLoading
+       */
+      setLoading: function() {
+        this.items = null;
+        this._gridLoading = true;
       },
       /**
        * Remove the values from all column header filter inputs.
