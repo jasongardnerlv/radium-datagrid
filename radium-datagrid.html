@@ -426,7 +426,7 @@ column.
           var gridDom = Polymer.dom(this.$.dggrid);
           for (var c = gridDom.childNodes.length - 1; c >= 0; c--) {
             var child = gridDom.childNodes[c];
-            if (child.nodeType === 1 && child.className.indexOf('row') >= 0 && child.className.indexOf('header') < 0) {
+            if (child.className.indexOf('header') < 0) {
               gridDom.removeChild(child);
             }
           }
