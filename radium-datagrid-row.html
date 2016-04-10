@@ -1,0 +1,24 @@
+<dom-module id="radium-datagrid-row">
+  <style is="custom-style">
+    :host {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+    :host ::content radium-datagrid-column:first-of-type #dgcolumn {
+      margin-left: 24px;
+    }
+  </style>
+  <template>
+    <content></content>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'radium-datagrid-row',
+      properties: {
+
+      },
+    });
+  })();
+</script>
