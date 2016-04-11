@@ -8,6 +8,11 @@
       white-space: nowrap;
       @apply(--layout-flex);
     }
+    .splitter {
+      width: 4px;
+      cursor: col-resize;
+      display: inline-block;
+    }
     #dgcolumn {
       font-size: 13px;
       color: rgba(0, 0, 0, 0.87);
@@ -69,7 +74,8 @@
     }
   </style>
   <template>
-    <div id="dgcolumn" on-tap="_sortHandler" class$="[[_headerClasses]]" >
+    <div class="splitter">&nbsp;</div><!--
+ --><div id="dgcolumn" on-tap="_sortHandler" class$="[[_headerClasses]]" >
       <content></content>
     </div>
   </template>
@@ -127,6 +133,7 @@
         } else {
           this.style['min-width'] = 'initial';
           this.style['max-width'] = 'initial';
+          this.style['flex'] = '';
         }
         this._bubbleUpdatesForHeaders('columnWidth');
       },
@@ -175,10 +182,34 @@
           this._sortDirection = null;
         }
       },
+      _onColumnDrag: function(e) {
+        var colIdx = [].indexOf.call(this.parentNode.children, this);
+        this.fire('column-resize', {idx:colIdx, delta:e.clientX - this._colDragX});
+        this._colDragX = e.clientX;
+      },
+      _onColumnEndDrag: function(e) {
+        window.removeEventListener('mousemove', this._boundColumnDragHandler);
+        window.removeEventListener('mouseup', this._boundColumnDragEndHandler);
+      },
       attached: function() {
         if (this.isHeader) {
           this.domHost.addEventListener('sort', this._sortChanged.bind(this));
         }
+      },
+      ready: function() {
+        this.async(function() {
+          if (this.domHost.disableColumnResize === false) {
+            this._boundColumnDragHandler = this._onColumnDrag.bind(this);
+            this._boundColumnDragEndHandler = this._onColumnEndDrag.bind(this);
+            var splitter = this.querySelector('.splitter');
+            splitter.addEventListener('mousedown', function(e) {
+              e.preventDefault();
+              this._colDragX = e.clientX;
+              window.addEventListener('mousemove', this._boundColumnDragHandler);
+              window.addEventListener('mouseup', this._boundColumnDragEndHandler);
+            }.bind(this));
+          }
+        }.bind(this));
       }
     });
   })();

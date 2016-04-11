@@ -57,6 +57,12 @@ TODO
     .vert-lines ::content radium-datagrid-column:last-of-type {
       border-right: none;
     }
+    :host([disable-column-resize]) ::content radium-datagrid-column .splitter {
+      display: none;
+    }
+    :host ::content radium-datagrid-column:first-of-type .splitter {
+      display: none;
+    }
   </style>
   <template>
     <div id="headerRow" class="horizontal layout">
@@ -64,7 +70,7 @@ TODO
         <radium-datagrid-column class="colHeader" config="[[header.config]]"
             data-sortable$="[[header.config.sortable]]">
           <iron-icon icon="arrow-forward"></iron-icon>
-          <div on-tap="_sortColumn">[[header.config.header]]<div>
+          <div on-tap="_sortColumn">[[header.config.header]]</div>
         </radium-datagrid-column>
       </template>
     </div>
@@ -79,6 +85,14 @@ TODO
     Polymer({
       is: 'radium-datagrid',
       properties: {
+        _columnWidths: {
+          type: Object,
+          value: function(){return {};},
+        },
+        _headers: {
+          type: Array,
+          value: function(){return null;}
+        },
         i18nFunction: {
           type: Function,
           value: null
@@ -91,9 +105,10 @@ TODO
           type: String,
           value: 'horizontal'
         },
-        _headers: {
-          type: Array,
-          value: function(){return null;}
+        disableColumnResize: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
         },
       },
       behaviors: [Polymer.Templatizer],
@@ -104,6 +119,7 @@ TODO
       _gridLoading: false,
       _itemsChanged: function(change) {
         this._gridLoading = false;
+        this._applyColumnWidths();
         this.async(function() {
           this.toggleClass('scroll-pad', (this.$.list.scrollHeight > this.$.list.clientHeight), this.$.headerRow);
         }.bind(this), 1);
@@ -133,6 +149,9 @@ TODO
         this._headers = headers;
       },
       _handleHeaderUpdate: function(e,detail) {
+        if (e.detail.prop === 'columnWidth') {
+          this._columnWidths = {};
+        }
         this.$.headerRow.children[detail.index][detail.prop] = e.target[detail.prop];
       },
       _computedTranslate: function(i18n, key, defaultVal) {
@@ -148,6 +167,40 @@ TODO
       _listScroll: function(e) {
         this.$.headerRow.scrollLeft = this.$.list.scrollLeft;
       },
+      _columnResize: function(e) {
+        var idx = e.detail.idx;
+        var delta = e.detail.delta;
+        this._resizeHeaders(idx, delta);
+        this._applyColumnWidths();
+      },
+      _applyColumnWidths: function() {
+        Object.keys(this._columnWidths).forEach(function(key) {
+          var rows = this.$.list.$.items.querySelectorAll('radium-datagrid-row');
+          for (var i = 0; i < rows.length; i++) {
+            this._resizeCell(rows[i].children[key], this._columnWidths[key]);
+          }
+        }.bind(this));
+      },
+      _resizeHeaders: function(idx, delta) {
+        var minColWidth = 48;
+        var col = this.$.headerRow.children[idx];
+        var colWidth = document.defaultView.getComputedStyle(col, '').getPropertyValue('width');
+        var newColWidth = (parseInt(colWidth, 10) - delta);
+        var prev = this.$.headerRow.children[idx - 1];
+        var prevWidth = document.defaultView.getComputedStyle(prev, '').getPropertyValue('width');
+        var newPrevWidth = (parseInt(prevWidth, 10) + delta);
+        if (newColWidth > minColWidth && newPrevWidth > minColWidth) {
+          this._columnWidths[idx] = newColWidth;
+          this._columnWidths[idx-1] = newPrevWidth;
+          this._resizeCell(col, newColWidth);
+          this._resizeCell(prev, newPrevWidth);
+        }
+      },
+      _resizeCell: function(cell, width) {
+        cell.style['min-width'] = width + 'px';
+        cell.style['max-width'] = width + 'px';
+        cell.style.flex = 'initial';
+      },
       setLoading: function() {
         this.items = null;
         this._gridLoading = true;
@@ -162,6 +215,7 @@ TODO
       },
       ready: function() {
         this.listen(this, 'update-header', '_handleHeaderUpdate');
+        this.listen(this, 'column-resize', '_columnResize');
       }
     });
   })();
