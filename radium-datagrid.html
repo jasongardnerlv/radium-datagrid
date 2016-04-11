@@ -63,6 +63,42 @@ TODO
     :host ::content radium-datagrid-column:first-of-type .splitter {
       display: none;
     }
+    .status-label {
+      height: calc(100% - 56px);
+      @apply(--layout-vertical);
+      @apply(--layout-center-center);
+    }
+    #noRecordsLabel {
+      font-size: 12px;
+      font-weight: 400;
+      font-style: italic;
+      color: rgba(0, 0, 0, 0.54);
+    }
+    #loadingIcon iron-icon {
+      color: rgba(0, 0, 0, 0.4);
+      -webkit-animation: icon-spin 1s infinite linear;
+      animation: icon-spin 1s infinite linear;
+    }
+    @-webkit-keyframes icon-spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+      }
+    }
+    @keyframes icon-spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+      }
+    }
   </style>
   <template>
     <div id="headerRow" class="horizontal layout">
@@ -74,9 +110,15 @@ TODO
         </radium-datagrid-column>
       </template>
     </div>
-    <iron-list id="list" items="[[items]]" as="row">
+    <iron-list id="list" items="[[items]]" as="row" hidden$="[[_checkListState(_listState, 0)]]">
       <content></content>
     </iron-list>
+    <div id="loadingIcon" class="status-label" hidden$="[[_checkListState(_listState, 1)]]">
+      <iron-icon icon="refresh"></iron-icon>
+    </div>
+    <div id="noRecordsLabel" class="status-label" hidden$="[[_checkListState(_listState, 2)]]">
+      [[_computedTranslate(i18nFunction, 'NO_RECORDS_FOUND', 'No Records Found')]]
+    </div>
     <content id="template" select="template"></content>
   </template>
 </dom-module>
@@ -85,6 +127,7 @@ TODO
     Polymer({
       is: 'radium-datagrid',
       properties: {
+        _listState: -1,
         _columnWidths: {
           type: Object,
           value: function(){return {};},
@@ -116,9 +159,8 @@ TODO
         '_itemsChanged(items.*)',
         '_gridLinesChanged(gridLines)'
       ],
-      _gridLoading: false,
       _itemsChanged: function(change) {
-        this._gridLoading = false;
+        this._listState = (this.items && this.items.length === 0) ? 2 : 0;
         this._applyColumnWidths();
         this.async(function() {
           this.toggleClass('scroll-pad', (this.$.list.scrollHeight > this.$.list.clientHeight), this.$.headerRow);
@@ -201,9 +243,30 @@ TODO
         cell.style['max-width'] = width + 'px';
         cell.style.flex = 'initial';
       },
+      _checkListState: function(state, idx) {
+        return state !== idx;
+      },
+      _getColumnHeaderById: function(colId) {
+        for (var i = 0; i < this.$.headerRow.children.length; i++) {
+          var header = this.$.headerRow.children[i];
+          if (colId === header.id) {
+            return header;
+          }
+        }
+        return null;
+      },
+      setColumnSort: function(colId, desc) {
+        var column = this._getColumnHeaderById(colId);
+        if (column !== null) {
+          column._sortDirection = (desc) ? 'desc' : 'asc';
+          column.fire('sort', {id:colId, direction:column._sortDirection});
+        } else {
+          throw new Error('Unrecognized column: ' + colId);
+        }
+      },
       setLoading: function() {
         this.items = null;
-        this._gridLoading = true;
+        this._listState = 1;
       },
       _boundScrollListener: null,
       attached: function() {
