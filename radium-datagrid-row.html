@@ -19,6 +19,12 @@
       properties: {
 
       },
+      attached: function() {
+        var grid = this.domHost;
+        if (!grid._headers) {
+          grid._setHeaders(this);
+        }
+      }
     });
   })();
 </script>

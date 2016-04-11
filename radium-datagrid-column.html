@@ -19,6 +19,12 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    :host.colHeader #dgcolumn {
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.54);
+      font-weight: 400;
+      height: 56px;
+    }
   </style>
   <template>
     <div id="dgcolumn">
@@ -32,11 +38,25 @@
       is: 'radium-datagrid-column',
       properties: {
         header: String,
-        columnWidth: Number
+        columnWidth: Number,
+        alignment: {
+          type: String,
+          value: 'left'
+        },
+        config: {
+          type: Object,
+          value: function(){return null;}
+        }
       },
       observers: [
-        '_widthChanged(columnWidth)'
+        '_headerChanged(header)',
+        '_widthChanged(columnWidth)',
+        '_alignmentChanged(alignment)',
+        '_configChange(config)'
       ],
+      _headerChanged: function() {
+        this._bubbleUpdatesForHeaders('header');
+      },
       _widthChanged: function() {
         if (this.columnWidth > 0) {
           this.style['min-width'] = this.columnWidth + 'px';
@@ -45,7 +65,26 @@
           this.style['min-width'] = 'initial';
           this.style['max-width'] = 'initial';
         }
+        this._bubbleUpdatesForHeaders('columnWidth');
       },
+      _alignmentChanged: function() {
+        this.$.dgcolumn.style['text-align'] = this.alignment;
+        this._bubbleUpdatesForHeaders('alignment');
+      },
+      _configChange: function(cfg) {
+        if (cfg !== null) {
+          Object.keys(cfg).forEach(function(key) {
+            if (key !== 'config' && key.indexOf('_') !== 0) {
+              this[key] = cfg[key];
+            }
+          }.bind(this));
+        }
+      },
+      _bubbleUpdatesForHeaders: function(prop) {
+        this.async(function() {
+          this.fire('update-header', {index:[].indexOf.call(this.parentNode.children, this),prop:prop});
+        }.bind(this));
+      }
     });
   })();
 </script>

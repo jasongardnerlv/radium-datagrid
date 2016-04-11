@@ -27,24 +27,35 @@ TODO
 -->
 <dom-module id="radium-datagrid">
   <style>
-    #list {
-      height: 100%;
+    #headerRow {
+      overflow: hidden;
     }
-    #list.hztl-lines ::content radium-datagrid-column {
+    #headerRow.scroll-pad {
+      margin-right: 15px;
+    }
+    #list {
+      height: calc(100% - 48px);
+    }
+    .hztl-lines ::content radium-datagrid-column {
       border-bottom-style: solid;
       border-bottom-width: 1px;
       border-bottom-color: var(--grid-line-color,#DDDDDD);
     }
-    #list.vert-lines ::content radium-datagrid-column {
+    .vert-lines ::content radium-datagrid-column {
       border-right-style: solid;
       border-right-width: 1px;
       border-right-color: var(--grid-line-color,#DDDDDD);
     }
-    #list.vert-lines ::content radium-datagrid-column:last-of-type {
+    .vert-lines ::content radium-datagrid-column:last-of-type {
       border-right: none;
     }
   </style>
   <template>
+    <div id="headerRow" class="horizontal layout">
+      <template is="dom-repeat" items="[[_headers]]" as="header">
+        <radium-datagrid-column class="colHeader" config="[[header.config]]">[[header.config.header]]</radium-datagrid-column>
+      </template>
+    </div>
     <iron-list id="list" items="[[items]]" as="row">
       <content></content>
     </iron-list>
@@ -68,6 +79,10 @@ TODO
           type: String,
           value: 'horizontal'
         },
+        _headers: {
+          type: Array,
+          value: function(){return null;}
+        },
       },
       behaviors: [Polymer.Templatizer],
       observers: [
@@ -77,19 +92,34 @@ TODO
       _gridLoading: false,
       _itemsChanged: function(change) {
         this._gridLoading = false;
+        this.async(function() {
+          this.toggleClass('scroll-pad', (this.$.list.scrollHeight > this.$.list.clientHeight), this.$.headerRow);
+        }.bind(this), 1);
       },
       _gridLinesChanged: function() {
-        this._updateGridLines();
+        this._updateGridLines(this.$.list);
+        this._updateGridLines(this.$.headerRow);
       },
-      _updateGridLines: function() {
-        this.toggleClass('hztl-lines', false, this.$.list);
-        this.toggleClass('vert-lines', false, this.$.list);
+      _updateGridLines: function(node) {
+        this.toggleClass('hztl-lines', false, node);
+        this.toggleClass('vert-lines', false, node);
         if (this.gridLines.toLowerCase() === 'horizontal' || this.gridLines.toLowerCase() === 'both') {
-          this.toggleClass('hztl-lines', true, this.$.list);
+          this.toggleClass('hztl-lines', true, node);
         }
         if (this.gridLines.toLowerCase() === 'vertical' || this.gridLines.toLowerCase() === 'both') {
-          this.toggleClass('vert-lines', true, this.$.list);
+          this.toggleClass('vert-lines', true, node);
         }
+      },
+      _setHeaders: function(row) {
+        var columns = row.querySelectorAll('radium-datagrid-column');
+        var headers = [];
+        for (var i = 0; i < columns.length; i++) {
+          headers.push({config:columns[i]._config});
+        };
+        this._headers = headers;
+      },
+      _handleHeaderUpdate: function(e,detail) {
+        this.$.headerRow.children[detail.index][detail.prop] = e.target[detail.prop];
       },
       _computedTranslate: function(i18n, key, defaultVal) {
         return this._translate(key, defaultVal);
@@ -101,12 +131,23 @@ TODO
           return defaultVal;
         }
       },
+      _listScroll: function(e) {
+        this.$.headerRow.scrollLeft = this.$.list.scrollLeft;
+      },
       setLoading: function() {
         this.items = null;
         this._gridLoading = true;
       },
+      _boundScrollListener: null,
+      attached: function() {
+        this._boundScrollListener = this._listScroll.bind(this);
+        this.$.list.addEventListener('scroll', this._boundScrollListener);
+      },
+      detached: function() {
+        this.$.list.removeEventListener('scroll', this._boundScrollListener);
+      },
       ready: function() {
-
+        this.listen(this, 'update-header', '_handleHeaderUpdate');
       }
     });
   })();
