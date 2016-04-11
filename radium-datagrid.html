@@ -33,8 +33,16 @@ TODO
     #headerRow.scroll-pad {
       margin-right: 15px;
     }
+    .colHeader {
+      min-height: 56px;
+      max-height: 56px;
+      line-height: 56px;
+    }
+    .colHeader[data-sortable] {
+      cursor: pointer;
+    }
     #list {
-      height: calc(100% - 48px);
+      height: calc(100% - 56px);
     }
     .hztl-lines ::content radium-datagrid-column {
       border-bottom-style: solid;
@@ -53,7 +61,11 @@ TODO
   <template>
     <div id="headerRow" class="horizontal layout">
       <template is="dom-repeat" items="[[_headers]]" as="header">
-        <radium-datagrid-column class="colHeader" config="[[header.config]]">[[header.config.header]]</radium-datagrid-column>
+        <radium-datagrid-column class="colHeader" config="[[header.config]]"
+            data-sortable$="[[header.config.sortable]]">
+          <iron-icon icon="arrow-forward"></iron-icon>
+          <div on-tap="_sortColumn">[[header.config.header]]<div>
+        </radium-datagrid-column>
       </template>
     </div>
     <iron-list id="list" items="[[items]]" as="row">
@@ -114,7 +126,9 @@ TODO
         var columns = row.querySelectorAll('radium-datagrid-column');
         var headers = [];
         for (var i = 0; i < columns.length; i++) {
-          headers.push({config:columns[i]._config});
+          var cfg = columns[i]._config;
+          cfg.isHeader = true;
+          headers.push({config:cfg});
         };
         this._headers = headers;
       },

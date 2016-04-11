@@ -25,9 +25,51 @@
       font-weight: 400;
       height: 56px;
     }
+    :host.colHeader #dgcolumn ::content > iron-icon {
+      margin-right: 4px;
+      pointer-events: none;
+      display: none;
+      width: 16px;
+      height: 16px;
+    }
+    :host.colHeader:hover #dgcolumn ::content > iron-icon {
+      display: inline-block;
+      -ms-transform: rotate(-90deg);
+      -webkit-transform: rotate(-90deg);
+      transform: rotate(-90deg);
+      color: rgba(0, 0, 0, 0.26);
+    }
+    :host.colHeader #dgcolumn ::content > div {
+      pointer-events: none;
+      display: inline-block;
+      height: 56px;
+    }
+    :host.colHeader:not([data-sortable]) #dgcolumn ::content > iron-icon {
+      display: none;
+    }
+    :host.colHeader #dgcolumn.sort-asc ::content {
+      color: rgba(0, 0, 0, 0.87);
+    }
+    :host.colHeader #dgcolumn.sort-asc ::content > iron-icon {
+      -ms-transform: rotate(-90deg);
+      -webkit-transform: rotate(-90deg);
+      transform: rotate(-90deg);
+      display: inline-block;
+      color: rgba(0, 0, 0, 0.87);
+    }
+    :host.colHeader #dgcolumn.sort-desc ::content {
+      color: rgba(0, 0, 0, 0.87);
+    }
+    :host.colHeader #dgcolumn.sort-desc ::content > iron-icon {
+      -ms-transform: rotate(90deg);
+      -webkit-transform: rotate(90deg);
+      transform: rotate(90deg);
+      display: inline-block;
+      color: rgba(0, 0, 0, 0.87);
+    }
   </style>
   <template>
-    <div id="dgcolumn">
+    <div id="dgcolumn" on-tap="_sortHandler" class$="[[_headerClasses]]" >
       <content></content>
     </div>
   </template>
@@ -37,23 +79,44 @@
     Polymer({
       is: 'radium-datagrid-column',
       properties: {
+        id: {
+          type: String,
+          value: ''
+        },
+        isHeader: {
+          type: Boolean,
+          value: false
+        },
         header: String,
         columnWidth: Number,
         alignment: {
           type: String,
           value: 'left'
         },
+        sortable: {
+          type: Boolean,
+          value: false
+        },
         config: {
           type: Object,
           value: function(){return null;}
+        },
+        _headerClasses: String,
+        _sortDirection: {
+          type:String,
+          value: null
         }
       },
       observers: [
+        '_sortDirectionChanged(_sortDirection)',
         '_headerChanged(header)',
         '_widthChanged(columnWidth)',
         '_alignmentChanged(alignment)',
         '_configChange(config)'
       ],
+      _sortDirectionChanged: function() {
+        this._computeHeaderClasses();
+      },
       _headerChanged: function() {
         this._bubbleUpdatesForHeaders('header');
       },
@@ -71,6 +134,13 @@
         this.$.dgcolumn.style['text-align'] = this.alignment;
         this._bubbleUpdatesForHeaders('alignment');
       },
+      _computeHeaderClasses: function() {
+        var classes = '';
+        if (this._sortDirection !== null) {
+          classes += 'sort-' + this._sortDirection;
+        }
+        this._headerClasses = classes;
+      },
       _configChange: function(cfg) {
         if (cfg !== null) {
           Object.keys(cfg).forEach(function(key) {
@@ -84,6 +154,31 @@
         this.async(function() {
           this.fire('update-header', {index:[].indexOf.call(this.parentNode.children, this),prop:prop});
         }.bind(this));
+      },
+      _sortHandler: function(e) {
+        if (this.sortable !== true) {
+          return;
+        }
+        if (this._sortDirection !== null) {
+          if (this._sortDirection === 'asc') {
+            this._sortDirection = 'desc';
+          } else {
+            this._sortDirection = 'asc';
+          }
+        } else {
+          this._sortDirection = 'asc';
+        }
+        this.fire('sort', {id:this.id, direction:this._sortDirection});
+      },
+      _sortChanged: function(e) {
+        if (e.detail.id !== this.id && this._sortDirection !== null) {
+          this._sortDirection = null;
+        }
+      },
+      attached: function() {
+        if (this.isHeader) {
+          this.domHost.addEventListener('sort', this._sortChanged.bind(this));
+        }
       }
     });
   })();
