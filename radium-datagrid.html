@@ -57,6 +57,9 @@ TODO
     .vert-lines ::content radium-datagrid-column:last-of-type {
       border-right: none;
     }
+    :host([selection-enabled]) ::content radium-datagrid-row:hover {
+      background-color: #EEEEEE;
+    }
     :host([disable-column-resize]) ::content radium-datagrid-column .splitter {
       display: none;
     }
@@ -147,7 +150,9 @@ TODO
         </radium-datagrid-column>
       </template>
     </div>
-    <iron-list id="list" items="[[items]]" as="row" hidden$="[[_checkListState(_listState, 0)]]">
+    <iron-list id="list" items="[[items]]" as="row" hidden$="[[_checkListState(_listState, 0)]]"
+        selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]"
+        selected-item="{{selectedItem}}" selected-items="{{selectedItems}}">
       <content></content>
     </iron-list>
     <div id="loadingIcon" class="status-label" hidden$="[[_checkListState(_listState, 1)]]">
@@ -233,6 +238,27 @@ TODO
         perPageOptions: {
           type: Array,
           value: function() { return []; }
+        },
+        selectionEnabled: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+        selectedItem: {
+          type: Object,
+          notify: true
+        },
+        selectedItems: {
+          type: Object,
+          notify: true
+        },
+        multiSelection: {
+          type: Boolean,
+          value: false
+        },
+        desktopMultiSelection: {
+          type: Boolean,
+          value: false
         },
       },
       behaviors: [Polymer.Templatizer],
@@ -366,6 +392,12 @@ TODO
         var dd = this.$$('#optionsDropdown');
         if (dd.opened) { return; }
         dd.open();
+      },
+      clearSelection: function() {
+        this.$.list.clearSelection();
+      },
+      selectItem: function(item) {
+        this.$.list.selectItem(item);
       },
       setColumnSort: function(colId, desc) {
         var column = this._getColumnHeaderById(colId);

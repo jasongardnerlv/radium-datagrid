@@ -7,6 +7,9 @@
     :host ::content radium-datagrid-column:first-of-type #dgcolumn {
       margin-left: 24px;
     }
+    :host[selected] {
+      background-color: #F5F5F5;
+    }
   </style>
   <template>
     <content></content>
@@ -17,14 +20,18 @@
     Polymer({
       is: 'radium-datagrid-row',
       properties: {
-
+        selected: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        }
       },
       attached: function() {
         var grid = this.domHost;
         if (!grid._headers) {
           grid._setHeaders(this);
         }
-      }
+      },
     });
   })();
 </script>

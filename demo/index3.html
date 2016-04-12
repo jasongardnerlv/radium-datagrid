@@ -36,10 +36,12 @@
         <radium-datagrid id="grid" items="[[_initialItems]]" selection-enabled="[[_selectEnabled]]"
             multi-selection="[[_multiSelect]]" desktop-multi-selection="[[_desktopMulti]]">
           <template>
-            <radium-datagrid-column id="icon" column-width="72px"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
-            <radium-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></radium-datagrid-column>
-            <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
-            <radium-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></radium-datagrid-column>
+            <radium-datagrid-row selected="[[selected]]">
+              <radium-datagrid-column id="icon" column-width="72px"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
+              <radium-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></radium-datagrid-column>
+              <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
+              <radium-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></radium-datagrid-column>
+            </radium-datagrid-row>
           </template>
         </radium-datagrid>
       </div>
