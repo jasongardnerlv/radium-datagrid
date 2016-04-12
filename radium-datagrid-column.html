@@ -191,12 +191,18 @@
         window.removeEventListener('mousemove', this._boundColumnDragHandler);
         window.removeEventListener('mouseup', this._boundColumnDragEndHandler);
       },
+      _preventShiftSelect: function(e) {
+        if (e.ctrlKey || e.shiftKey) {
+          e.preventDefault();
+        }
+      },
       attached: function() {
         if (this.isHeader) {
           this.domHost.addEventListener('sort', this._sortChanged.bind(this));
         }
       },
       ready: function() {
+        this.listen(this, 'mousedown', '_preventShiftSelect');
         this.async(function() {
           if (this.domHost.disableColumnResize === false) {
             this._boundColumnDragHandler = this._onColumnDrag.bind(this);

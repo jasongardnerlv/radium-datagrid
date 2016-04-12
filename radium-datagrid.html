@@ -151,7 +151,8 @@ TODO
       </template>
     </div>
     <iron-list id="list" items="[[items]]" as="row" hidden$="[[_checkListState(_listState, 0)]]"
-        selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]"
+        selection-enabled="[[_checkSelectionEnabled(selectionEnabled,desktopMultiSelection)]]"
+        multi-selection="[[_checkMultiSelectionEnabled(multiSelection,desktopMultiSelection)]]"
         selected-item="{{selectedItem}}" selected-items="{{selectedItems}}">
       <content></content>
     </iron-list>
@@ -264,7 +265,8 @@ TODO
       behaviors: [Polymer.Templatizer],
       observers: [
         '_itemsChanged(items.*)',
-        '_gridLinesChanged(gridLines)'
+        '_gridLinesChanged(gridLines)',
+        '_desktopMultiSelectChanged(desktopMultiSelection)'
       ],
       _itemsChanged: function(change) {
         this._listState = (this.items && this.items.length === 0) ? 2 : 0;
@@ -276,6 +278,35 @@ TODO
       _gridLinesChanged: function() {
         this._updateGridLines(this.$.list);
         this._updateGridLines(this.$.headerRow);
+      },
+      _desktopMultiSelectChanged: function() {
+        var handler = (this.selectionEnabled && this.desktopMultiSelection) ? this.listen : this.unlisten;
+        handler.call(this, this.$.list, 'tap', '_desktopMultiSelectHandler');
+      },
+      _desktopMultiSelectHandler: function(e) {
+        if (this.selectionEnabled) {
+          var evt = e.detail.sourceEvent;
+          if (evt.ctrlKey === false && evt.metaKey === false && evt.shiftKey === false) {
+            this.clearSelection();
+          }
+          var model = this.$.list.modelForElement(e.target);
+          if (model) {
+            var item = model[this.$.list.as];
+            var idx = this.items.indexOf(item);
+            if (evt.shiftKey === true) {
+              if (!isNaN(this._lastSelectedIndex)) {
+                var smaller = (idx < this._lastSelectedIndex) ? idx : this._lastSelectedIndex;
+                var bigger = (idx < this._lastSelectedIndex) ? this._lastSelectedIndex : idx;
+                for (var i = smaller; i <= bigger; i++) {
+                  this.$.list.selectItem(this.items[i]);
+                }
+              }
+            } else {
+              this.$.list.toggleSelectionForItem(item);
+            }
+            this._lastSelectedIndex = idx;
+          }
+        }
       },
       _updateGridLines: function(node) {
         this.toggleClass('hztl-lines', false, node);
@@ -392,6 +423,12 @@ TODO
         var dd = this.$$('#optionsDropdown');
         if (dd.opened) { return; }
         dd.open();
+      },
+      _checkSelectionEnabled: function(sel, dms) {
+        return sel && !dms;
+      },
+      _checkMultiSelectionEnabled: function(ms, dms) {
+        return ms || dms;
       },
       clearSelection: function() {
         this.$.list.clearSelection();
