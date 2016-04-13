@@ -2,12 +2,12 @@
 <link rel="import" href="../iron-flex-layout/classes/iron-flex-layout.html">
 <link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
-<link rel="import" href="../iron-list/iron-list.html">
 <link rel="import" href="../iron-dropdown/iron-dropdown.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../paper-material/paper-material.html">
 <link rel="import" href="../paper-item/paper-item.html">
 <link rel="import" href="datagrid-icons.html">
+<link rel="import" href="radium-iron-list.html">
 <link rel="import" href="radium-datagrid-row.html">
 <link rel="import" href="radium-datagrid-column.html">
 
@@ -150,12 +150,12 @@ TODO
         </radium-datagrid-column>
       </template>
     </div>
-    <iron-list id="list" items="[[items]]" as="row" hidden$="[[_checkListState(_listState, 0)]]"
+    <radium-iron-list id="list" items="[[items]]" as="row" hidden$="[[_checkListState(_listState, 0)]]"
         selection-enabled="[[_checkSelectionEnabled(selectionEnabled,desktopMultiSelection)]]"
         multi-selection="[[_checkMultiSelectionEnabled(multiSelection,desktopMultiSelection)]]"
         selected-item="{{selectedItem}}" selected-items="{{selectedItems}}">
       <content></content>
-    </iron-list>
+    </radium-iron-list>
     <div id="loadingIcon" class="status-label" hidden$="[[_checkListState(_listState, 1)]]">
       <iron-icon icon="refresh"></iron-icon>
     </div>
