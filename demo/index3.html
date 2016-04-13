@@ -17,8 +17,7 @@
     #gridExample {
       min-width: 480px;
       max-width: 480px;
-      border: 1px solid #DDDDDD;
-      background-color: #FFFFFF;
+      height: 400px;
     }
     .demo-button {
       width: 240px;
@@ -37,7 +36,7 @@
             multi-selection="[[_multiSelect]]" desktop-multi-selection="[[_desktopMulti]]">
           <template>
             <radium-datagrid-row selected="[[selected]]">
-              <radium-datagrid-column id="icon" column-width="72px"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
+              <radium-datagrid-column id="icon" column-width="72"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
               <radium-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></radium-datagrid-column>
               <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
               <radium-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></radium-datagrid-column>

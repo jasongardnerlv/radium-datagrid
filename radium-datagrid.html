@@ -27,7 +27,13 @@ TODO
 -->
 <dom-module id="radium-datagrid">
   <style>
+    #dgwrapper {
+      height: 100%;
+      border: 1px solid #DDDDDD;
+      background-color: #FFFFFF;
+    }
     #headerRow {
+      white-space: nowrap;
       overflow: hidden;
     }
     #headerRow.scroll-pad {
@@ -41,8 +47,12 @@ TODO
     .colHeader[data-sortable] {
       cursor: pointer;
     }
-    #list {
-      height: calc(100% - 56px);
+    :host #list {
+      background-color: #FFFFFF;
+      height: calc(100% - 57px);
+    }
+    :host[enable-paging] #list {
+      height: calc(100% - 113px);
     }
     .hztl-lines ::content radium-datagrid-column {
       border-bottom-style: solid;
@@ -56,6 +66,12 @@ TODO
     }
     .vert-lines ::content radium-datagrid-column:last-of-type {
       border-right: none;
+    }
+    :host([filters-enabled]) ::content radium-datagrid-column.colHeader #dgcolumn {
+      height: 32px;
+    }
+    :host([filters-enabled]) ::content radium-datagrid-column.colHeader #colFilter {
+      display: block !important;
     }
     :host([selection-enabled]) ::content radium-datagrid-row:hover {
       background-color: #EEEEEE;
@@ -108,8 +124,7 @@ TODO
       font-size: 12px;
       font-weight: 400;
       color: rgba(0, 0, 0, 0.54);
-      border: solid 1px #DDDDDD;
-      border-top: none;
+      border-top: solid 1px #DDDDDD;
     }
     #footerRow > paper-icon-button {
       margin: 0px 2px;
@@ -141,51 +156,53 @@ TODO
     }
   </style>
   <template>
-    <div id="headerRow" class="horizontal layout">
-      <template is="dom-repeat" items="[[_headers]]" as="header">
-        <radium-datagrid-column class="colHeader" config="[[header.config]]"
-            data-sortable$="[[header.config.sortable]]">
-          <iron-icon icon="arrow-forward"></iron-icon>
-          <div on-tap="_sortColumn">[[header.config.header]]</div>
-        </radium-datagrid-column>
+    <div id="dgwrapper">
+      <div id="headerRow" class="horizontal layout">
+        <template is="dom-repeat" items="[[_headers]]" as="header">
+          <radium-datagrid-column class="colHeader" config="[[header.config]]"
+              data-sortable$="[[header.config.sortable]]">
+            <iron-icon icon="arrow-forward"></iron-icon>
+            <div on-tap="_sortColumn">[[header.config.header]]</div>
+          </radium-datagrid-column>
+        </template>
+      </div>
+      <radium-iron-list id="list" items="[[items]]" as="row" hidden$="[[_checkListState(_listState, 0)]]"
+          selection-enabled="[[_checkSelectionEnabled(selectionEnabled,desktopMultiSelection)]]"
+          multi-selection="[[_checkMultiSelectionEnabled(multiSelection,desktopMultiSelection)]]"
+          selected-item="{{selectedItem}}" selected-items="{{selectedItems}}">
+        <content></content>
+      </radium-iron-list>
+      <div id="loadingIcon" class="status-label" hidden$="[[_checkListState(_listState, 1)]]">
+        <iron-icon icon="refresh"></iron-icon>
+      </div>
+      <div id="noRecordsLabel" class="status-label" hidden$="[[_checkListState(_listState, 2)]]">
+        [[_computedTranslate(i18nFunction, 'NO_RECORDS_FOUND', 'No Records Found')]]
+      </div>
+      <template is="dom-if" if="[[enablePaging]]">
+        <div id="footerRow" class="center horizontal layout">
+          <div class="flex"></div>
+          <span>[[_computedTranslate(i18nFunction,'ROWS_PER_PAGE','Rows per page:')]]</span>
+          <span id="perPage">[[itemsPerPage]]</span>
+          <div>
+            <paper-icon-button id="perPageArrow" icon="arrow-drop-down" noink on-click="_showPageOpts"></paper-icon-button>
+            <iron-dropdown id="optionsDropdown" horizontal-align="right" vertical-align="bottom">
+              <paper-material class="dropdown-content">
+                <div class="options">
+                  <template is="dom-repeat" items="[[perPageOptions]]">
+                    <paper-item on-click="_optHandler">[[item]]</paper-item>
+                  </template>
+                </div>
+              </paper-material>
+            </iron-dropdown>
+          </div>
+          <span id="pages">[[_calcPaging(currentPage,itemsPerPage,totalItems,i18nFunction)]]</span>
+          <paper-icon-button icon="datagrid:first-page" on-click="_firstPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:prev-page" on-click="_prevPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:next-page" on-click="_nextPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:last-page" on-click="_lastPage"></paper-icon-button>
+        </div>
       </template>
     </div>
-    <radium-iron-list id="list" items="[[items]]" as="row" hidden$="[[_checkListState(_listState, 0)]]"
-        selection-enabled="[[_checkSelectionEnabled(selectionEnabled,desktopMultiSelection)]]"
-        multi-selection="[[_checkMultiSelectionEnabled(multiSelection,desktopMultiSelection)]]"
-        selected-item="{{selectedItem}}" selected-items="{{selectedItems}}">
-      <content></content>
-    </radium-iron-list>
-    <div id="loadingIcon" class="status-label" hidden$="[[_checkListState(_listState, 1)]]">
-      <iron-icon icon="refresh"></iron-icon>
-    </div>
-    <div id="noRecordsLabel" class="status-label" hidden$="[[_checkListState(_listState, 2)]]">
-      [[_computedTranslate(i18nFunction, 'NO_RECORDS_FOUND', 'No Records Found')]]
-    </div>
-    <template is="dom-if" if="[[enablePaging]]">
-      <div id="footerRow" class="center horizontal layout">
-        <div class="flex"></div>
-        <span>[[_computedTranslate(i18nFunction,'ROWS_PER_PAGE','Rows per page:')]]</span>
-        <span id="perPage">[[itemsPerPage]]</span>
-        <div>
-          <paper-icon-button id="perPageArrow" icon="arrow-drop-down" noink on-click="_showPageOpts"></paper-icon-button>
-          <iron-dropdown id="optionsDropdown" horizontal-align="right" vertical-align="bottom">
-            <paper-material class="dropdown-content">
-              <div class="options">
-                <template is="dom-repeat" items="[[perPageOptions]]">
-                  <paper-item on-click="_optHandler">[[item]]</paper-item>
-                </template>
-              </div>
-            </paper-material>
-          </iron-dropdown>
-        </div>
-        <span id="pages">[[_calcPaging(currentPage,itemsPerPage,totalItems,i18nFunction)]]</span>
-        <paper-icon-button icon="datagrid:first-page" on-click="_firstPage"></paper-icon-button>
-        <paper-icon-button icon="datagrid:prev-page" on-click="_prevPage"></paper-icon-button>
-        <paper-icon-button icon="datagrid:next-page" on-click="_nextPage"></paper-icon-button>
-        <paper-icon-button icon="datagrid:last-page" on-click="_lastPage"></paper-icon-button>
-      </div>
-    </template>
     <content id="template" select="template"></content>
   </template>
 </dom-module>
@@ -222,7 +239,8 @@ TODO
         },
         enablePaging: {
           type: Boolean,
-          value: false
+          value: false,
+          reflectToAttribute: true
         },
         currentPage: {
           type: Number,
@@ -261,12 +279,18 @@ TODO
           type: Boolean,
           value: false
         },
+        filtersEnabled: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
       },
       behaviors: [],
       observers: [
         '_itemsChanged(items.*)',
         '_gridLinesChanged(gridLines)',
-        '_desktopMultiSelectChanged(desktopMultiSelection)'
+        '_desktopMultiSelectChanged(desktopMultiSelection)',
+        '_filtersEnabledChanged(filtersEnabled)'
       ],
       _itemsChanged: function(change) {
         this._listState = (this.items && this.items.length === 0) ? 2 : 0;
@@ -282,6 +306,12 @@ TODO
       _desktopMultiSelectChanged: function() {
         var handler = (this.selectionEnabled && this.desktopMultiSelection) ? this.listen : this.unlisten;
         handler.call(this, this.$.list, 'tap', '_desktopMultiSelectHandler');
+      },
+      _filtersEnabledChanged: function() {
+        var firstFilter = this.$.headerRow.querySelector('#colFilter[data-filter] input');
+        if (firstFilter !== null) {
+          firstFilter.focus();
+        }
       },
       _desktopMultiSelectHandler: function(e) {
         if (this.selectionEnabled) {
@@ -322,8 +352,9 @@ TODO
         var columns = row.querySelectorAll('radium-datagrid-column');
         var headers = [];
         for (var i = 0; i < columns.length; i++) {
-          var cfg = columns[i]._config;
+          var cfg = columns[i].__data__;
           cfg.isHeader = true;
+          cfg.id = columns[i].id;
           headers.push({config:cfg});
         };
         this._headers = headers;
@@ -448,6 +479,12 @@ TODO
       setLoading: function() {
         this.items = null;
         this._listState = 1;
+      },
+      clearFilters: function() {
+        var filterInputs = this.$.headerRow.querySelectorAll('#colFilter[data-filter] input');
+        for (var i = 0; i < filterInputs.length; i++) {
+          filterInputs[i].value = '';
+        };
       },
       _boundScrollListener: null,
       attached: function() {

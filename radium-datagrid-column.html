@@ -1,3 +1,5 @@
+<link rel="import" href="radium-datagrid-column-filter.html">
+
 <dom-module id="radium-datagrid-column">
   <style is="custom-style">
     :host {
@@ -13,7 +15,7 @@
       cursor: col-resize;
       display: inline-block;
     }
-    #dgcolumn {
+    #dgcolumnWrapper {
       font-size: 13px;
       color: rgba(0, 0, 0, 0.87);
       display: inline-block;
@@ -24,11 +26,14 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    :host.colHeader #dgcolumn {
+    :host.colHeader #dgcolumnWrapper {
       font-size: 12px;
       color: rgba(0, 0, 0, 0.54);
       font-weight: 400;
       height: 56px;
+    }
+    :host #dgcolumn ::content > iron-icon {
+      height: 48px;
     }
     :host.colHeader #dgcolumn ::content > iron-icon {
       margin-right: 4px;
@@ -75,8 +80,13 @@
   </style>
   <template>
     <div class="splitter">&nbsp;</div><!--
- --><div id="dgcolumn" on-tap="_sortHandler" class$="[[_headerClasses]]" >
-      <content></content>
+ --><div id="dgcolumnWrapper">
+      <div id="dgcolumn" on-tap="_sortHandler" class$="[[_headerClasses]]" >
+        <content></content>
+      </div>
+      <template is="dom-if" if="[[isHeader]]">
+        <radium-datagrid-column-filter filter-type="[[filterType]]" filter-options="[[filterOptions]]"></radium-datagrid-column-filter>
+      </template>
     </div>
   </template>
 </dom-module>
@@ -103,6 +113,11 @@
           type: Boolean,
           value: false
         },
+        filterType: String,
+        filterOptions: {
+          type: Array,
+          value: null
+        },
         config: {
           type: Object,
           value: function(){return null;}
@@ -118,6 +133,7 @@
         '_headerChanged(header)',
         '_widthChanged(columnWidth)',
         '_alignmentChanged(alignment)',
+        '_filterOptionsChanged(filterOptions)',
         '_configChange(config)'
       ],
       _sortDirectionChanged: function() {
@@ -138,13 +154,32 @@
         this._bubbleUpdatesForHeaders('columnWidth');
       },
       _alignmentChanged: function() {
+        this._computeHeaderClasses();
         this.$.dgcolumn.style['text-align'] = this.alignment;
         this._bubbleUpdatesForHeaders('alignment');
       },
+      _filterOptionsChanged: function() {
+        this._showFilterOptions = (this.filterOptions !== undefined && this.filterOptions !== null);
+      },
       _computeHeaderClasses: function() {
         var classes = '';
+        switch (this.alignment) {
+          case 'center':
+            classes +=  'center-justified';
+            break;
+          case 'right':
+            classes +=  'end-justified';
+            break;
+          default:
+            classes +=  'start-justified';
+            break;
+        }
+        classes +=  ' center horizontal layout';
+        if (isNaN(this.columnWidth) || this.columnWidth <= 0) {
+          classes +=  ' flex';
+        }
         if (this._sortDirection !== null) {
-          classes += 'sort-' + this._sortDirection;
+          classes += ' sort-' + this._sortDirection;
         }
         this._headerClasses = classes;
       },
