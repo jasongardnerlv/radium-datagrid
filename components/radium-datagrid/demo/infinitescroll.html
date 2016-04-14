@@ -16,29 +16,28 @@
     }
     #gridContainer {
       top: 64px;
+      overflow:hidden;
     }
-    #gridExample {
-      background-color: #FFFFFF;
-      border: 1px solid #DDDDDD;
-      overflow-y: auto;
-      height: 400px;
+    #grid {
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
 <body unresolved>
   <template is="dom-bind" id="app">
-    <h3>radium-datagrid example (infinite scroll w/ fixed header)</h3>
+    <h3>radium-datagrid example (infinite scroll)</h3>
     <div id="gridContainer" class="horizontal layout fit">
-      <div id="gridExample" class="flex">
-        <radium-datagrid id="grid" items="[[_initialItems]]" on-scroll-more="_addMoreItems" fixed-header-footer>
-          <template>
-            <radium-datagrid-column id="icon" column-width="72px"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
+      <radium-datagrid id="grid" items="[[_initialItems]]" on-scroll-more="_addMoreItems">
+        <template>
+          <radium-datagrid-row>
+            <radium-datagrid-column id="icon" column-width="72"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
             <radium-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></radium-datagrid-column>
             <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
             <radium-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></radium-datagrid-column>
-          </template>
-        </radium-datagrid>
-      </div>
+          </radium-datagrid-row>
+        </template>
+      </radium-datagrid>
     </div>
   </template>
   <script>
@@ -73,7 +72,8 @@
       app._initialItems = app._genFakeData(26);
       app._numRecords = 26;
       app.addEventListener('dom-change', function() {
-        this.$.grid.enableInfiniteScroll();
+        this.$.grid.refit();
+        this.$.grid.enableInfiniteScroll(this.$.gridExample);
       }.bind(app));
   </script>
 </body>

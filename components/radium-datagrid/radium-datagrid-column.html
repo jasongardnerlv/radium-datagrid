@@ -1,7 +1,5 @@
-<link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../iron-icon/iron-icon.html">
-<link rel="import" href="../iron-icons/iron-icons.html">
 <link rel="import" href="radium-datagrid-column-filter.html">
+
 <dom-module id="radium-datagrid-column">
   <style is="custom-style">
     :host {
@@ -10,16 +8,14 @@
       max-height: 48px;
       cursor: default;
       white-space: nowrap;
+      @apply(--layout-flex);
     }
-    :host.selected {
-      background-color: #F5F5F5;
-    }
-    :host .splitter {
+    .splitter {
       width: 4px;
       cursor: col-resize;
       display: inline-block;
     }
-    #dgcolumn {
+    #dgcolumnWrapper {
       font-size: 13px;
       color: rgba(0, 0, 0, 0.87);
       display: inline-block;
@@ -30,50 +26,51 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    #dgcolumn > ::content #colHeader {
+    :host.colHeader #dgcolumnWrapper {
       font-size: 12px;
       color: rgba(0, 0, 0, 0.54);
       font-weight: 400;
+      height: 56px;
     }
-    #dgcolumn > ::content #colHeader[data-sortable] {
-      cursor: pointer;
+    :host #dgcolumn ::content > iron-icon {
+      height: 48px;
     }
-    #dgcolumn > ::content #colHeader > iron-icon {
+    :host.colHeader #dgcolumn ::content > iron-icon {
       margin-right: 4px;
       pointer-events: none;
       display: none;
       width: 16px;
       height: 16px;
     }
-    #dgcolumn > ::content #colHeader:hover > iron-icon {
+    :host.colHeader:hover #dgcolumn ::content > iron-icon {
       display: inline-block;
       -ms-transform: rotate(-90deg);
       -webkit-transform: rotate(-90deg);
       transform: rotate(-90deg);
       color: rgba(0, 0, 0, 0.26);
     }
-    #dgcolumn > ::content #colHeader > div {
+    :host.colHeader #dgcolumn ::content > div {
       pointer-events: none;
       display: inline-block;
       height: 56px;
     }
-    #dgcolumn > ::content #colHeader:not([data-sortable]) > iron-icon {
+    :host.colHeader:not([data-sortable]) #dgcolumn ::content > iron-icon {
       display: none;
     }
-    #dgcolumn > ::content #colHeader.sort-asc {
+    :host.colHeader #dgcolumn.sort-asc ::content {
       color: rgba(0, 0, 0, 0.87);
     }
-    #dgcolumn > ::content #colHeader.sort-asc > iron-icon {
+    :host.colHeader #dgcolumn.sort-asc ::content > iron-icon {
       -ms-transform: rotate(-90deg);
       -webkit-transform: rotate(-90deg);
       transform: rotate(-90deg);
       display: inline-block;
       color: rgba(0, 0, 0, 0.87);
     }
-    #dgcolumn > ::content #colHeader.sort-desc {
+    :host.colHeader #dgcolumn.sort-desc ::content {
       color: rgba(0, 0, 0, 0.87);
     }
-    #dgcolumn > ::content #colHeader.sort-desc > iron-icon {
+    :host.colHeader #dgcolumn.sort-desc ::content > iron-icon {
       -ms-transform: rotate(90deg);
       -webkit-transform: rotate(90deg);
       transform: rotate(90deg);
@@ -83,16 +80,14 @@
   </style>
   <template>
     <div class="splitter">&nbsp;</div><!--
- --><div id="dgcolumn">
-      <content></content>
-    </div>
-    <template id="headerTpl">
-      <div id="colHeader" data-id$="[[id]]" data-sortable$="[[sortable]]" class$="[[_headerClasses]]" style$="[[_headerStyle]]">
-        <iron-icon icon="arrow-forward"></iron-icon>
-        <div>[[header]]</div>
+ --><div id="dgcolumnWrapper">
+      <div id="dgcolumn" on-tap="_sortHandler" class$="[[_headerClasses]]" >
+        <content></content>
       </div>
-      <radium-datagrid-column-filter filter-type="[[filterType]]" filter-options="[[filterOptions]]"></radium-datagrid-column-filter>
-    </template>
+      <template is="dom-if" if="[[isHeader]]">
+        <radium-datagrid-column-filter filter-type="[[filterType]]" filter-options="[[filterOptions]]"></radium-datagrid-column-filter>
+      </template>
+    </div>
   </template>
 </dom-module>
 <script>
@@ -100,10 +95,6 @@
     Polymer({
       is: 'radium-datagrid-column',
       properties: {
-        _sortDirection: {
-          type:String,
-          value: null
-        },
         /**
          * Id value to use for the column.  Useful for correlating event callbacks like sorting
          */
@@ -112,20 +103,20 @@
           value: ''
         },
         /**
-         * Width of the column. The value can be a fixed value to set directly on the columns css->width (e.g. '100px')
-         * or a '*' can be used to indicate it should use as much width as it can (flexbox flex).
+         * Indicates a column object is a header.  Only used internally and should not be set directly
          */
-        columnWidth: {
-          type: String,
-          value: ''
+        isHeader: {
+          type: Boolean,
+          value: false
         },
         /**
          * Text to display as the header label of the column
          */
-        header: {
-          type: String,
-          value: ''
-        },
+        header: String,
+        /**
+         * Width of the column. If omitted, the column will simply 'flex'
+         */
+        columnWidth: Number,
         /**
          * How to align content within the column - _left_, _center_, or _right_
          */
@@ -140,89 +131,105 @@
           type: Boolean,
           value: false
         },
+        /**
+         * Which type of filter control should be presented for the given column - _text_, _date_, or _options_
+         */
         filterType: String,
+        /**
+         * For filterType _options_, the filterOptions is the array of possible values to filter on
+         */
         filterOptions: {
           type: Array,
           value: null
         },
-        _isHeader: {
-          type: Boolean,
-          value: false
+        /**
+         * Internally mapped configurations.  Should not be set directly.
+         */
+        config: {
+          type: Object,
+          value: function(){return null;}
         },
         _headerClasses: String,
-        _headerStyle: String,
-        _model: Object,
-        _filterType: String
+        _sortDirection: {
+          type:String,
+          value: null
+        }
       },
-      behaviors: [Polymer.Templatizer],
       observers: [
         '_sortDirectionChanged(_sortDirection)',
-        '_widthChanged(columnWidth)',
         '_headerChanged(header)',
+        '_widthChanged(columnWidth)',
         '_alignmentChanged(alignment)',
-        '_modelChanged(_model.*)',
-        '_filterOptionsChanged(filterOptions)'
+        '_filterOptionsChanged(filterOptions)',
+        '_configChange(config)'
       ],
       _sortDirectionChanged: function() {
         this._computeHeaderClasses();
       },
-      _widthChanged: function() {
-        this._checkHeader();
-        this.toggleClass('flex', false);
-        this.style['min-width'] = '';
-        if (this.columnWidth === '' || this.columnWidth === '*') {
-          this.toggleClass('flex', true);
-        } else {
-          this.style['min-width'] = this.columnWidth;
-          this.style['max-width'] = this.columnWidth;
-        }
-        this._computeHeaderClasses();
-        this._computeHeaderStyle();
-      },
       _headerChanged: function() {
-        this._checkHeader();
-        if (this._isHeader) {
-          if (!this._headerStamped) {
-            this._stampHeader();
-          }
-        }
+        this._bubbleUpdatesForHeaders('header');
       },
-      _stampHeader: function() {
-        var colDom = Polymer.dom(this.$.dgcolumn);
-        if (colDom.childNodes.length > 0) {
-          for (var c = colDom.childNodes.length - 1; c >= 0; c--) {
-            colDom.removeChild(colDom.childNodes[c]);
-          }
+      _widthChanged: function() {
+        if (this.columnWidth > 0) {
+          this.style['min-width'] = this.columnWidth + 'px';
+          this.style['max-width'] = this.columnWidth + 'px';
+        } else {
+          this.style['min-width'] = 'initial';
+          this.style['max-width'] = 'initial';
+          this.style['flex'] = '';
         }
-        this.templatize(this.$.headerTpl);
-        var headerNode = this.stamp({});
-        colDom.appendChild(headerNode.root);
-        this.listen(this._getColumnHeader(), 'click', '_sortHandler');
-        this._headerStamped = true;
+        this._bubbleUpdatesForHeaders('columnWidth');
       },
       _alignmentChanged: function() {
-        if (this._isHeader) {
-          this._computeHeaderClasses();
-        }
+        this._computeHeaderClasses();
         this.$.dgcolumn.style['text-align'] = this.alignment;
+        this._bubbleUpdatesForHeaders('alignment');
       },
-      _checkHeader: function() {
-        if (this._isHeader === undefined) {
-          this._isHeader = this._templateInstance._config.isHeader;
-          this._isHeader = this._isHeader || false;
-          if (this._isHeader) {
-            this.setAttribute('column-header', '');
-          }
+      _filterOptionsChanged: function() {
+        this._showFilterOptions = (this.filterOptions !== undefined && this.filterOptions !== null);
+      },
+      _computeHeaderClasses: function() {
+        var classes = '';
+        switch (this.alignment) {
+          case 'center':
+            classes +=  'center-justified';
+            break;
+          case 'right':
+            classes +=  'end-justified';
+            break;
+          default:
+            classes +=  'start-justified';
+            break;
+        }
+        classes +=  ' center horizontal layout';
+        if (isNaN(this.columnWidth) || this.columnWidth <= 0) {
+          classes +=  ' flex';
+        }
+        if (this._sortDirection !== null) {
+          classes += ' sort-' + this._sortDirection;
+        }
+        this._headerClasses = classes;
+      },
+      _configChange: function(cfg) {
+        if (cfg !== null) {
+          var applyProps = function(obj) {
+            Object.keys(obj).forEach(function(key) {
+              if (key !== 'config' && key.indexOf('_') !== 0) {
+                this[key] = obj[key];
+              }
+            }.bind(this));
+          }.bind(this);
+          applyProps(cfg.config);
+          applyProps(cfg.data);
         }
       },
-      _forwardParentProp: function(prop, value) {
-        this._getColumnHeader()._templateInstance[prop] = value;
-      },
-      _getColumnHeader: function() {
-        return this.querySelectorAll('#colHeader')[0];
+      _bubbleUpdatesForHeaders: function(prop) {
+        this.async(function() {
+          this.fire('update-header', {index:[].indexOf.call(this.parentNode.children, this),prop:prop});
+        }.bind(this));
       },
       _sortHandler: function(e) {
-        if (this.modelForElement(e.target).sortable !== true) {
+        if (this.sortable !== true) {
           return;
         }
         if (this._sortDirection !== null) {
@@ -241,47 +248,8 @@
           this._sortDirection = null;
         }
       },
-      _computeHeaderStyle: function(w) {
-        if (w !== null && w !== '' && w !== '*') {
-          this._headerStyle = 'min-width: ' + w + ';max-width: ' + w ;
-        } else {
-          this._headerStyle = '';
-        }
-      },
-      _computeHeaderClasses: function() {
-        var classes = '';
-        switch (this.alignment) {
-          case 'center':
-            classes +=  'center-justified';
-            break;
-          case 'right':
-            classes +=  'end-justified';
-            break;
-          default:
-            classes +=  'start-justified';
-            break;
-        }
-        classes +=  ' center horizontal layout';
-        if (this.columnWidth === null || this.columnWidth === '' || this.columnWidth === '*') {
-          classes +=  ' flex';
-        }
-        if (this._sortDirection !== null) {
-          classes += ' sort-' + this._sortDirection;
-        }
-        this._headerClasses = classes;
-      },
-      _modelChanged: function() {
-        if (this._model && this._model.selected === true) {
-          this.toggleClass('selected', true);
-        } else {
-          this.toggleClass('selected', false);
-        }
-      },
-      _filterOptionsChanged: function() {
-        this._showFilterOptions = (this.filterOptions !== undefined && this.filterOptions !== null);
-      },
       _onColumnDrag: function(e) {
-        var colIdx = Array.prototype.indexOf.call(this.parentNode.children, this);
+        var colIdx = [].indexOf.call(this.parentNode.children, this);
         this.fire('column-resize', {idx:colIdx, delta:e.clientX - this._colDragX});
         this._colDragX = e.clientX;
       },
@@ -289,14 +257,18 @@
         window.removeEventListener('mousemove', this._boundColumnDragHandler);
         window.removeEventListener('mouseup', this._boundColumnDragEndHandler);
       },
+      _preventShiftSelect: function(e) {
+        if (e.ctrlKey || e.shiftKey) {
+          e.preventDefault();
+        }
+      },
       attached: function() {
-        if (this._isHeader) {
+        if (this.isHeader) {
           this.domHost.addEventListener('sort', this._sortChanged.bind(this));
-        } else {
-          this._model = this.dataHost.row;
         }
       },
       ready: function() {
+        this.listen(this, 'mousedown', '_preventShiftSelect');
         this.async(function() {
           if (this.domHost.disableColumnResize === false) {
             this._boundColumnDragHandler = this._onColumnDrag.bind(this);
@@ -310,7 +282,7 @@
             }.bind(this));
           }
         }.bind(this));
-      },
+      }
     });
   })();
 </script>
