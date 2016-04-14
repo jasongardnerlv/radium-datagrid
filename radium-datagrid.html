@@ -166,7 +166,7 @@ TODO
     <div id="dgwrapper">
       <div id="headerRow" class="horizontal layout">
         <template is="dom-repeat" items="[[_headers]]" as="header">
-          <radium-datagrid-column class="colHeader" config="[[header.config]]"
+          <radium-datagrid-column class="colHeader" config="[[header]]"
               data-sortable$="[[header.config.sortable]]">
             <iron-icon icon="arrow-forward"></iron-icon>
             <div on-tap="_sortColumn">[[header.config.header]]</div>
@@ -365,10 +365,9 @@ TODO
         var columns = row.querySelectorAll('radium-datagrid-column');
         var headers = [];
         for (var i = 0; i < columns.length; i++) {
-          var cfg = columns[i].__data__;
-          cfg.isHeader = true;
-          cfg.id = columns[i].id;
-          headers.push({config:cfg});
+          var data = columns[i].__data__;
+          data.isHeader = true;
+          headers.push({data:data,config:columns[i]._aboveConfig});
         };
         this._headers = headers;
       },

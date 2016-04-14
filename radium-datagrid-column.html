@@ -185,11 +185,15 @@
       },
       _configChange: function(cfg) {
         if (cfg !== null) {
-          Object.keys(cfg).forEach(function(key) {
-            if (key !== 'config' && key.indexOf('_') !== 0) {
-              this[key] = cfg[key];
-            }
-          }.bind(this));
+          var applyProps = function(obj) {
+            Object.keys(obj).forEach(function(key) {
+              if (key !== 'config' && key.indexOf('_') !== 0) {
+                this[key] = obj[key];
+              }
+            }.bind(this));
+          }.bind(this);
+          applyProps(cfg.config);
+          applyProps(cfg.data);
         }
       },
       _bubbleUpdatesForHeaders: function(prop) {
