@@ -14,16 +14,34 @@
 <!--
 A Material Design inspired data grid element for Polymer.js apps.
 
-TODO
+This element uses, as an initial foundation, the Google Material Design specification for data tables:
+[Data Tables](https://www.google.com/design/spec/components/data-tables.html)
+
+However, the goal of the element is to support much richer _data grid_ functionality, so there will be necessary
+deviations or extrapolations, as features that are not included in the specification are added to this element.
+
+### Simple Example:
+
+    <radium-datagrid items="[[_myItems]]">
+      <template>
+        <radium-datagrid-row>
+          <radium-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></radium-datagrid-column>
+          <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
+          <radium-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></radium-datagrid-column>
+        </radium-datagrid-row>
+      </template>
+    </radium-datagrid>
+
+A row will be rendered for each item of the collection, and the _row_ property will be available for the template of each
+column.
 
 @element radium-datagrid
-@demo demo/index.html Basic configurations
-@demo demo/index2.html Paging footer
-@demo demo/index3.html Item selection
-@demo demo/index4.html Fixed header
-@demo demo/index5.html Infinite scroll
-@demo demo/index6.html Infinite scroll 2
-@demo demo/index7.html Column Filtering
+@demo demo/configs.html Basic configurations
+@demo demo/dataload.html Data loading states
+@demo demo/paging.html Paging footer
+@demo demo/selection.html Item selection
+@demo demo/infinitescroll.html Infinite scroll
+@demo demo/filters.html Column Filtering
 -->
 <dom-module id="radium-datagrid">
   <style>
@@ -218,6 +236,53 @@ TODO
   (function() {
     Polymer({
       is: 'radium-datagrid',
+      /*
+       * A column is being sorted
+       *
+       * @event sort
+       */
+
+      /*
+       * A row was double-clicked
+       *
+       * @event row-dblclick
+       */
+
+      /*
+       * A new page size was selected
+       *
+       * @event per-page-change
+       */
+
+      /*
+       * The user desires to navigate to the next page
+       *
+       * @event next-page
+       */
+
+      /*
+       * The user desires to navigate to the previous page
+       *
+       * @event prev-page
+       */
+
+      /*
+       * The user desires to navigate to the first page
+       *
+       * @event first-page
+       */
+
+      /*
+       * The user desires to navigate to the last page
+       *
+       * @event last-page
+       */
+
+      /*
+       * When infinite scrolling is enabled, this indicates the need to fetch more data
+       *
+       * @event scroll-more
+       */
       properties: {
         _listState: -1,
         _columnWidths: {
@@ -228,70 +293,124 @@ TODO
           type: Array,
           value: function(){return null;}
         },
+        /**
+         * Function invoked for string translations.
+         * The first arg is the string key to be translated.
+         */
         i18nFunction: {
           type: Function,
           value: null
         },
+        /**
+         * An array containing the objects that will correspond to each row of the grid
+         */
         items: {
           type: Array,
           value: function(){return null;}
         },
+        /**
+         * Which row/column border lines to draw - _none_, _horizontal_, _vertical_, or _both_
+         */
         gridLines: {
           type: String,
           value: 'horizontal'
         },
+        /**
+         * Whether to disallow columns from resizing
+         */
         disableColumnResize: {
           type: Boolean,
           value: false,
           reflectToAttribute: true
         },
+        /**
+         * Whether or not activate and display the paging footer controls
+         */
         enablePaging: {
           type: Boolean,
           value: false,
           reflectToAttribute: true
         },
+        /**
+         * Current page displayed, when paging
+         */
         currentPage: {
           type: Number,
           value: 1
         },
+        /**
+         * Number of items shown per page, when paging
+         */
         itemsPerPage: {
           type: Number,
           value: 10
         },
+        /**
+         * Total number of items available, when paging
+         */
         totalItems: {
           type: Number,
           value: 0
         },
+        /**
+         * Page sizes avilable for the user to choose from, when paging
+         */
         perPageOptions: {
           type: Array,
           value: function() { return []; }
         },
+        /**
+         * Whether or not row selection is enabled
+         */
         selectionEnabled: {
           type: Boolean,
           value: false,
           reflectToAttribute: true
         },
+        /**
+         * When `multiSelection` is false, this is the currently selected item, or `null`
+         * if no item is selected.
+         */
         selectedItem: {
           type: Object,
           notify: true
         },
+        /**
+         * When `multiSelection` is true, this is an array that contains the selected items.
+         */
         selectedItems: {
           type: Object,
           notify: true
         },
+        /**
+         * Whether or not row multi selection is enabled
+         */
         multiSelection: {
           type: Boolean,
           value: false
         },
+        /**
+         * Whether or not _desktop like_ row multi selection is enabled.  By default, multi-selection will behave in a
+         * manner that is useful for both mobile and desktop scenarios, i.e. each click will select/deselect a given
+         * row, and keyboard combinations like _ctrl+click_ and _shift+click_ have no effect.  With
+         * `desktop-multii-selection`, these keyboard combinations are supported.
+         */
         desktopMultiSelection: {
           type: Boolean,
           value: false
         },
+        /**
+         * Whether or not to show column filters in the header
+         */
         filtersEnabled: {
           type: Boolean,
           value: false,
           reflectToAttribute: true
         },
+        /**
+         * Element name to use for the date picker (defaults as "paper-date-picker").  Assumed to be imported already.
+         */
+        datePickerElement: String
       },
       behaviors: [],
       observers: [
@@ -488,12 +607,48 @@ TODO
           this.fire('scroll-more');
         }
       },
+      /**
+       * Clear any currently selected rows
+       *
+       * @method clearSelection
+       */
       clearSelection: function() {
         this.$.list.clearSelection();
       },
+      /**
+       * Select the row that corresponds to the provided item
+       *
+       * @method selectItem
+       * @param {Object} Item to select
+       */
       selectItem: function(item) {
         this.$.list.selectItem(item);
       },
+      /**
+       * Deselect the row that corresponds to the provided item
+       *
+       * @method deselectItem
+       * @param {Object} Item to deselect
+       */
+      deselectItem: function(item) {
+        this.$.list.deselectItem(item);
+      },
+      /**
+       * Select or deselect the row that corresponds to the provided item, depending on its current selected state
+       *
+       * @method toggleSelectionForItem
+       * @param {Object} Item to select/deselect
+       */
+      toggleSelectionForItem: function(item) {
+        this.$.list.toggleSelectionForItem(item);
+      },
+      /**
+       * Set the current sort
+       *
+       * @method setColumnSort
+       * @param {String} Id of the column to show as sorted
+       * @param {Boolean} Sort descending (default is ascending)
+       */
       setColumnSort: function(colId, desc) {
         var column = this._getColumnHeaderById(colId);
         if (column !== null) {
@@ -503,23 +658,49 @@ TODO
           throw new Error('Unrecognized column: ' + colId);
         }
       },
+      /**
+       * Clears the current items and shows a loading spinner.  Clear this by setting the items property to an array
+       *
+       * @method showLoading
+       */
       setLoading: function() {
         this.items = null;
         this._listState = 1;
       },
+      /**
+       * Remove the values from all column header filter inputs.
+       *
+       * @method clearFilters
+       */
       clearFilters: function() {
         var filterInputs = this.$.headerRow.querySelectorAll('#colFilter[data-filter] input');
         for (var i = 0; i < filterInputs.length; i++) {
           filterInputs[i].value = '';
-        };
+        }
       },
+      /**
+       * Enable infinite scroll
+       *
+       * @method enableInfiniteScroll
+       */
       enableInfiniteScroll: function() {
         this._scrollListener = this._scrollHandler.bind(this);
         this.$.list.addEventListener('scroll', this._scrollListener);
       },
+      /**
+       * When using the infinite scroll feature, this method can be called during the on-scroll-more handler to indicate
+       * there is no additional data available.
+       *
+       * @method infiniteScrollDone
+       */
       infiniteScrollDone: function() {
         this._hideInfiniteScrollIcon();
       },
+      /**
+       * Force the grid to repaint its rows, based on new scroll boundaries
+       *
+       * @method refit
+       */
       refit: function() {
         this.$.list._resizeHandler();
       },

@@ -95,29 +95,56 @@
     Polymer({
       is: 'radium-datagrid-column',
       properties: {
+        /**
+         * Id value to use for the column.  Useful for correlating event callbacks like sorting
+         */
         id: {
           type: String,
           value: ''
         },
+        /**
+         * Indicates a column object is a header.  Only used internally and should not be set directly
+         */
         isHeader: {
           type: Boolean,
           value: false
         },
+        /**
+         * Text to display as the header label of the column
+         */
         header: String,
+        /**
+         * Width of the column. If omitted, the column will simply 'flex'
+         */
         columnWidth: Number,
+        /**
+         * How to align content within the column - _left_, _center_, or _right_
+         */
         alignment: {
           type: String,
           value: 'left'
         },
+        /**
+         * Whether or not to enable the column for sorting
+         */
         sortable: {
           type: Boolean,
           value: false
         },
+        /**
+         * Which type of filter control should be presented for the given column - _text_, _date_, or _options_
+         */
         filterType: String,
+        /**
+         * For filterType _options_, the filterOptions is the array of possible values to filter on
+         */
         filterOptions: {
           type: Array,
           value: null
         },
+        /**
+         * Internally mapped configurations.  Should not be set directly.
+         */
         config: {
           type: Object,
           value: function(){return null;}

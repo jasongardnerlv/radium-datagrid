@@ -20,6 +20,10 @@
     Polymer({
       is: 'radium-datagrid-row',
       properties: {
+        /**
+         * If using row selection, be sure to bind this to the 'selected' variable in scope
+         * i.e. selected="[[selected]]"
+         */
         selected: {
           type: Boolean,
           value: false,
