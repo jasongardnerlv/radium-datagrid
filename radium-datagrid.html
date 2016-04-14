@@ -93,7 +93,14 @@ TODO
       font-style: italic;
       color: rgba(0, 0, 0, 0.54);
     }
-    #loadingIcon iron-icon {
+    #infiniteLoader {
+      background-color: #FFFFFF;
+      position: absolute;
+      bottom: 4px;
+      left: 0px;
+      right: 0px;
+    }
+    .loadingIcon iron-icon {
       color: rgba(0, 0, 0, 0.4);
       -webkit-animation: icon-spin 1s infinite linear;
       animation: icon-spin 1s infinite linear;
@@ -172,12 +179,13 @@ TODO
           selected-item="{{selectedItem}}" selected-items="{{selectedItems}}">
         <content></content>
       </radium-iron-list>
-      <div id="loadingIcon" class="status-label" hidden$="[[_checkListState(_listState, 1)]]">
+      <div class="loadingIcon status-label" hidden$="[[_checkListState(_listState, 1)]]">
         <iron-icon icon="refresh"></iron-icon>
       </div>
       <div id="noRecordsLabel" class="status-label" hidden$="[[_checkListState(_listState, 2)]]">
         [[_computedTranslate(i18nFunction, 'NO_RECORDS_FOUND', 'No Records Found')]]
       </div>
+      <div id="infiniteLoader" class="loadingIcon layout horizontal center-center" hidden$="[[!_infiniteScrolling]]"><iron-icon icon="refresh"></iron-icon></div>
       <template is="dom-if" if="[[enablePaging]]">
         <div id="footerRow" class="center horizontal layout">
           <div class="flex"></div>
@@ -292,8 +300,13 @@ TODO
         '_desktopMultiSelectChanged(desktopMultiSelection)',
         '_filtersEnabledChanged(filtersEnabled)'
       ],
+      _infiniteScrolling: false,
       _itemsChanged: function(change) {
         this._listState = (this.items && this.items.length === 0) ? 2 : 0;
+        if (this._infiniteScrolling) {
+          this.$.list._resetScrollPosition(this._infiniteScrollPos);
+        }
+        this._hideInfiniteScrollIcon();
         this._applyColumnWidths();
         this.async(function() {
           this.toggleClass('scroll-pad', (this.$.list.scrollHeight > this.$.list.clientHeight), this.$.headerRow);
@@ -461,6 +474,21 @@ TODO
       _checkMultiSelectionEnabled: function(ms, dms) {
         return ms || dms;
       },
+      _showInfiniteScrollIcon: function() {
+        this._infiniteScrolling = true;
+      },
+      _hideInfiniteScrollIcon: function() {
+        this._infiniteScrolling = false;
+      },
+      _scrollHandler: function() {
+        var h1 = this.$.list.scrollHeight;
+        var h2 = parseInt(document.defaultView.getComputedStyle(this.$.list, '').getPropertyValue('height'), 10);
+        if (this._infiniteScrolling === false && this.$.list.scrollTop >= (h1 - h2)) {
+          this._infiniteScrollPos = this.$.list.scrollTop;
+          this._showInfiniteScrollIcon();
+          this.fire('scroll-more');
+        }
+      },
       clearSelection: function() {
         this.$.list.clearSelection();
       },
@@ -485,6 +513,16 @@ TODO
         for (var i = 0; i < filterInputs.length; i++) {
           filterInputs[i].value = '';
         };
+      },
+      enableInfiniteScroll: function() {
+        this._scrollListener = this._scrollHandler.bind(this);
+        this.$.list.addEventListener('scroll', this._scrollListener);
+      },
+      infiniteScrollDone: function() {
+        this._hideInfiniteScrollIcon();
+      },
+      refit: function() {
+        this.$.list._resizeHandler();
       },
       _boundScrollListener: null,
       attached: function() {

@@ -16,9 +16,11 @@
     }
     #gridContainer {
       top: 64px;
+      overflow:hidden;
     }
-    #gridExample {
-      overflow-y: auto;
+    #grid {
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
@@ -26,16 +28,16 @@
   <template is="dom-bind" id="app">
     <h3>radium-datagrid example (infinite scroll)</h3>
     <div id="gridContainer" class="horizontal layout fit">
-      <div id="gridExample" class="flex">
-        <radium-datagrid id="grid" items="[[_initialItems]]" on-scroll-more="_addMoreItems">
-          <template>
+      <radium-datagrid id="grid" items="[[_initialItems]]" on-scroll-more="_addMoreItems">
+        <template>
+          <radium-datagrid-row>
             <radium-datagrid-column id="icon" column-width="72"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
             <radium-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></radium-datagrid-column>
             <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
             <radium-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></radium-datagrid-column>
-          </template>
-        </radium-datagrid>
-      </div>
+          </radium-datagrid-row>
+        </template>
+      </radium-datagrid>
     </div>
   </template>
   <script>
@@ -70,6 +72,7 @@
       app._initialItems = app._genFakeData(26);
       app._numRecords = 26;
       app.addEventListener('dom-change', function() {
+        this.$.grid.refit();
         this.$.grid.enableInfiniteScroll(this.$.gridExample);
       }.bind(app));
   </script>
