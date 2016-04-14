@@ -21,8 +21,7 @@
     #gridExample {
       min-width: 720px;
       max-width: 720px;
-      border: 1px solid #DDDDDD;
-      background-color: #FFFFFF;
+      height: 400px;
     }
     .demo-button {
       width: 240px;
@@ -42,12 +41,14 @@
       <div id="gridExample">
         <radium-datagrid id="grid" items="[[_appliedItems]]" filters-enabled="[[_showFilters]]" on-filter="_filterChanged">
           <template>
-            <radium-datagrid-column id="icon" column-width="72px"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
-            <radium-datagrid-column id="foo" column-width="72px" header="Foo" filter-type="text"><span>[[row.foo]]</span></radium-datagrid-column>
-            <radium-datagrid-column id="bar" column-width="72px" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
-            <radium-datagrid-column id="baz" column-width="72px" header="Baz" filter-type="text"><span>[[row.baz]]</span></radium-datagrid-column>
-            <radium-datagrid-column id="thedate" header="Date" filter-type="date"><span>[[_formatDate(row.thedate)]]</span></radium-datagrid-column>
-            <radium-datagrid-column id="status" column-width="120px" header="Status" filter-type="options" filter-options="[[_statusArr]]"><span>[[_getStatusLabel(row.status, _statusArr)]]</span></radium-datagrid-column>
+            <radium-datagrid-row>
+              <radium-datagrid-column id="icon" column-width="72"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
+              <radium-datagrid-column id="foo" column-width="72" header="Foo" filter-type="text"><span>[[row.foo]]</span></radium-datagrid-column>
+              <radium-datagrid-column id="bar" column-width="72" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
+              <radium-datagrid-column id="baz" column-width="72" header="Baz" filter-type="text"><span>[[row.baz]]</span></radium-datagrid-column>
+              <radium-datagrid-column id="thedate" header="Date" filter-type="date"><span>[[_formatDate(row.thedate)]]</span></radium-datagrid-column>
+              <radium-datagrid-column id="status" column-width="120" header="Status" filter-type="options" filter-options="[[_statusArr]]"><span>[[_getStatusLabel(row.status, _statusArr)]]</span></radium-datagrid-column>
+            </radium-datagrid-row>
           </template>
         </radium-datagrid>
       </div>

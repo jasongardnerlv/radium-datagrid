@@ -15,10 +15,9 @@
       font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
     #gridExample {
+      height: 500px;
       min-width: 480px;
       max-width: 480px;
-      border: 1px solid #DDDDDD;
-      background-color: #FFFFFF;
     }
     .demo-button {
       width: 240px;
@@ -35,10 +34,12 @@
       <div id="gridExample">
         <radium-datagrid id="grid" items="[[_appliedItems]]" grid-lines="[[_gridLines]]" on-sort="_sortHandler">
           <template>
-            <radium-datagrid-column id="icon" column-width="72px"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
-            <radium-datagrid-column id="foo" header="Foo" alignment="[[_colAlign]]" column-width="[[_colWidth]]" sortable><span>[[row.foo]]</span></radium-datagrid-column>
-            <radium-datagrid-column id="bar" header="Bar" alignment="[[_colAlign]]" column-width="[[_colWidth]]"><span>[[row.bar]]</span></radium-datagrid-column>
-            <radium-datagrid-column id="baz" header="Baz" alignment="[[_colAlign]]" column-width="[[_colWidth]]" sortable><span>[[row.baz]]</span></radium-datagrid-column>
+            <radium-datagrid-row>
+              <radium-datagrid-column id="icon" column-width="72"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
+              <radium-datagrid-column id="foo" header="Foo" alignment="[[_colAlign]]" column-width="[[_colWidth]]" sortable><span>[[row.foo]]</span></radium-datagrid-column>
+              <radium-datagrid-column id="bar" header="Bar" alignment="[[_colAlign]]" column-width="[[_colWidth]]"><span>[[row.bar]]</span></radium-datagrid-column>
+              <radium-datagrid-column id="baz" header="Baz" alignment="[[_colAlign]]" column-width="[[_colWidth]]" sortable><span>[[row.baz]]</span></radium-datagrid-column>
+            </radium-datagrid-row>
           </template>
         </radium-datagrid>
       </div>
@@ -53,9 +54,9 @@
   <script>
       var GRID_LINES_OPTIONS = ['none','vertical','horizontal','both'];
       var GRID_LINE_COLORS = ['default','blue','red','green'];
-      app._gridLines = 'horizontal';
+      app._gridLines = 'vertical';
       app._lineColor = 'default';
-      app._colWidth = '*';
+      app._colWidth = -1;
       app._colAlign = 'left';
       app._genFakeData = function() {
         var data = [];
@@ -106,14 +107,11 @@
       };
       app._toggleColumnWidth = function() {
         switch(app._colWidth) {
-          case '*':
-            app._colWidth = '200px';
-            break;
-          case '200px':
-            app._colWidth = '50%';
+          case -1:
+            app._colWidth = 200;
             break;
           default:
-            app._colWidth = '*';
+            app._colWidth = -1;
             break;
         }
       };
