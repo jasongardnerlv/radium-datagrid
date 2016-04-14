@@ -30,11 +30,15 @@
           reflectToAttribute: true
         }
       },
+      _dblclickHander: function() {
+        this.fire('row-dblclick', this.dataHost.row);
+      },
       attached: function() {
         var grid = this.domHost;
         if (!grid._headers) {
           grid._setHeaders(this);
         }
+        this.listen(this, 'dblclick', '_dblclickHander')
       },
     });
   })();
