@@ -74,6 +74,9 @@ column.
     :host([selection-enabled]) ::content .row.header:hover {
       background-color: initial;
     }
+    :host([disable-column-resize]) ::content .row radium-datagrid-column .splitter {
+      display: none;
+    }
     :host ::content .row radium-datagrid-column:first-of-type .splitter {
       display: none;
     }
@@ -143,10 +146,13 @@ column.
     #optionsDropdown paper-item.iron-selected {
       font-weight: initial;
     }
-    #infScrollIcon {
+    #gridLoadingIcon {
+      height: 100%;
+    }
+    .loadingIcon {
       height: 56px;
     }
-    #infScrollIcon iron-icon {
+    .loadingIcon iron-icon {
       color: rgba(0, 0, 0, 0.4);
       -webkit-animation: icon-spin 1s infinite linear;
       animation: icon-spin 1s infinite linear;
@@ -178,6 +184,7 @@ column.
     </array-selector>
     <div id="dgwrapper">
       <div id="dgheader" class="header row center horizontal layout"></div>
+      <div id="gridLoadingIcon" class="loadingIcon layout horizontal center-center" hidden$="[[!_gridLoading]]"><iron-icon icon="refresh"></iron-icon></div>
       <div id="dggrid"></div>
       <template is="dom-if" if="[[enablePaging]]">
         <div id="dgfooter" class="center horizontal layout">
@@ -203,7 +210,7 @@ column.
           <paper-icon-button icon="datagrid:last-page" on-click="_lastPage"></paper-icon-button>
         </div>
       </template>
-      <div id="infScrollIcon" class="layout horizontal center-center" hidden$="[[!_infiniteScrolling]]"><iron-icon icon="refresh"></iron-icon></div>
+      <div class="loadingIcon layout horizontal center-center" hidden$="[[!_infiniteScrolling]]"><iron-icon icon="refresh"></iron-icon></div>
     </div>
     <content id="template" select="template"></content>
   </template>
@@ -378,7 +385,19 @@ column.
           type: Boolean,
           value: false,
           reflectToAttribute: true
-        }
+        },
+        /**
+         * Whether to disallow columns from resizing
+         */
+        disableColumnResize: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+        /**
+         * Element name to use for the date picker (defaults as "paper-date-picker").  Assumed to be imported already.
+         */
+        datePickerElement: String
       },
       behaviors: [Polymer.Templatizer],
       observers: [
@@ -391,7 +410,9 @@ column.
       ],
       _scroller: null,
       _infiniteScrolling: false,
+      _gridLoading: false,
       _itemsChanged: function(change) {
+        this._gridLoading = false;
         if (change.path === 'items' || change.path === 'items.splices') {
           var template = Polymer.dom(this.$.template).getDistributedNodes()[0];
           if (!this.ctor) {
@@ -761,6 +782,15 @@ column.
        */
       infiniteScrollDone: function() {
         this._hideInfiniteScrollIcon();
+      },
+      /**
+       * Clears the current items and shows a loading spinner.  Clear this by setting the items property to an array
+       *
+       * @method showLoading
+       */
+      setLoading: function() {
+        this.items = null;
+        this._gridLoading = true;
       },
       /**
        * Remove the values from all column header filter inputs.

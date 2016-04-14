@@ -7,7 +7,6 @@
 <link rel="import" href="../paper-item/paper-item.html">
 <link rel="import" href="../paper-listbox/paper-listbox.html">
 <link rel="import" href="../paper-material/paper-material.html">
-<link rel="import" href="../paper-date-picker/paper-date-picker.html">
 <link rel="import" href="datestring-validator.html">
 <dom-module id="radium-datagrid-column-filter">
   <style is="custom-style">
@@ -80,7 +79,7 @@
       color: #0072BC;
       min-width: 24px;
     }
-    #dateDialog ::content paper-date-picker {
+    #dateDialog ::content #picker {
       padding: 0px;
       margin-top: 0px;
     }
@@ -122,8 +121,7 @@
       </iron-dropdown>
       <div id="filterPH">&nbsp;</div>
     </div>
-    <paper-dialog id="dateDialog" class="paper-date-picker-dialog" modal on-iron-overlay-closed="_dateDialogClosed">
-      <paper-date-picker date="{{_selectedDate}}"></paper-date-picker>
+    <paper-dialog id="dateDialog" class="date-picker-dialog" modal on-iron-overlay-closed="_dateDialogClosed">
       <div class="buttons">
         <paper-button dialog-dismiss>[[_computedTranslate(_gridRef, 'CANCEL', 'Cancel')]]</paper-button>
         <paper-button dialog-confirm>[[_computedTranslate(_gridRef, 'OK', 'OK')]]</paper-button>
@@ -154,12 +152,17 @@
         },
         _selectedDate: {
           type: Date,
-          notify: true,
-          value: new Date()
+          value: new Date(),
+          observer: '_selectedDateChanged'
         },
         _gridRef: {
           type: Object,
           value: null
+        }
+      },
+      _selectedDateChanged: function(newValue) {
+        if (this.$.picker) {
+          this.$.picker.date = newValue;
         }
       },
       _filtersEnabled: function(ft) {
@@ -241,6 +244,16 @@
         this._showDateDialog(this.$.toDate, 'to');
       },
       _showDateDialog: function(dateInput, fid) {
+        if (!this.$.picker) {
+          var picker = this.$.picker =
+              document.createElement((this._gridRef.datePickerElement) ? this._gridRef.datePickerElement : 'paper-date-picker');
+          picker.id = 'picker';
+          picker.date = this._selectedDate;
+          picker.addEventListener("date-changed", function(ev) {
+            this._selectedDate = picker.date;
+          }.bind(this));
+          this.$.dateDialog.insertBefore(picker,this.$.dateDialog.firstChild);
+        }
         var currentDate;
         if (dateInput.value) {
           currentDate = new Date(dateInput.value);
