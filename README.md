@@ -12,9 +12,11 @@ deviations or extrapolations, as features that are not included in the specifica
 
     <radium-datagrid items="[[_myItems]]">
       <template>
-        <radium-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></radium-datagrid-column>
-        <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
-        <radium-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></radium-datagrid-column>
+        <radium-datagrid-row>
+          <radium-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></radium-datagrid-column>
+          <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
+          <radium-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></radium-datagrid-column>
+        </radium-datagrid-row>
       </template>
     </radium-datagrid>
 
@@ -23,25 +25,22 @@ column.
 
 ### Demos
 
-####[Basic configurations](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/index.html)
+####[Basic configurations](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/configs.html)
 Column width, alignment, and grid line/color options. Column sorting also demonstrated.
 
-####[Paging footer](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/index2.html)
+####[Data Loading States](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/dataload.html)
+Shows the various states of the grid initial, loading, loaded, and no records
+
+####[Paging footer](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/paging.html)
 Optional footer with paging controls.
 
-####[Item selection](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/index3.html)
+####[Item selection](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/selection.html)
 Single selection and multi-selection examples (both cross-device and desktop specific).
 
-####[Fixed header](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/index4.html)
-Example of fixed column headers with scrolling rows.
-
-####[Infinite scroll](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/index5.html)
+####[Infinite scroll](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/infinitescroll.html)
 Simple infinite scroll example.
 
-####[Infinite scroll 2](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/index6.html)
-Infinite scroll within a fixed height container with fixed headers.
-
-####[Column Filters](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/index7.html)
+####[Column Filters](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/filters.html)
 Toggle inputs on column headers to filter data.
 
 ###License
