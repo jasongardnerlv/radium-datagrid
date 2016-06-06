@@ -229,7 +229,7 @@
         }.bind(this));
       },
       _sortHandler: function(e) {
-        if (this.sortable !== true) {
+        if (!this.isHeader || this.sortable !== true) {
           return;
         }
         if (this._sortDirection !== null) {

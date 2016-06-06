@@ -490,7 +490,7 @@ column.
         var columns = row.querySelectorAll('radium-datagrid-column');
         var headers = [];
         for (var i = 0; i < columns.length; i++) {
-          var data = columns[i].__data__;
+          var data = JSON.parse(JSON.stringify(columns[i].__data__));
           data.isHeader = true;
           headers.push({data:data,config:columns[i]._aboveConfig});
         };
