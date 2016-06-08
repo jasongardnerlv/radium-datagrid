@@ -664,7 +664,7 @@ column.
           column._sortDirection = (desc) ? 'desc' : 'asc';
           column.fire('sort', {id:colId, direction:column._sortDirection});
         } else {
-          console.error('Unrecognized column: ' + colId);
+          console.warn('Unrecognized column: ' + colId);
         }
       },
       /**
