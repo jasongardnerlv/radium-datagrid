@@ -662,9 +662,6 @@ column.
         var column = this._getColumnHeaderById(colId);
         if (column !== null) {
           column._sortDirection = (desc) ? 'desc' : 'asc';
-          column.fire('sort', {id:colId, direction:column._sortDirection});
-        } else {
-          console.warn('Unrecognized column: ' + colId);
         }
       },
       /**
