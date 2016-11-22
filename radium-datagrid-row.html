@@ -30,8 +30,8 @@
           reflectToAttribute: true
         }
       },
-      _dblclickHander: function() {
-        this.fire('row-dblclick', this.dataHost.row);
+      _dblclickHander: function(e) {
+        this.fire('row-dblclick', {row:this.dataHost.row,sourceEvent:e});
       },
       attached: function() {
         var grid = this.domHost;
