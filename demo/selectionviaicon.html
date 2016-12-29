@@ -19,24 +19,34 @@
       max-width: 480px;
       height: 400px;
     }
+    .right-col {
+      margin: 0px 16px 16px 16px;
+    }
     .demo-button {
       width: 240px;
-      margin: 0px 16px 16px 16px;
       color: #FFFFFF;
       background-color: var(--paper-blue-500);
+    }
+    radium-datagrid-column {
+      cursor: pointer;
+    }
+    iron-icon.selected {
+      color: var(--paper-blue-500);
     }
   </style>
 </head>
 <body unresolved>
   <template is="dom-bind" id="app">
-    <h3>radium-datagrid example (item selection)</h3>
+    <h3>radium-datagrid example (item selection via icon)</h3>
     <div class="horizontal layout">
       <div id="gridExample">
-        <radium-datagrid id="grid" items="[[_initialItems]]" selection-enabled="[[_selectEnabled]]"
-            multi-selection="[[_multiSelect]]" desktop-multi-selection="[[_desktopMulti]]">
+        <radium-datagrid id="grid" items="[[_initialItems]]" multi-selection="[[_multiSelect]]" desktop-multi-selection="[[_desktopMulti]]"
+          on-item-select="_itemSelected" on-item-deselect="_itemDeselected" on-row-tap="_rowTapped">
           <template>
             <radium-datagrid-row selected="[[selected]]">
-              <radium-datagrid-column id="icon" column-width="72"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
+              <radium-datagrid-column id="icon" column-width="72" on-tap="_toggleSelection">
+                <iron-icon icon="check-box-outline-blank"></iron-icon>
+              </radium-datagrid-column>
               <radium-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></radium-datagrid-column>
               <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
               <radium-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></radium-datagrid-column>
@@ -45,14 +55,13 @@
         </radium-datagrid>
       </div>
       <div class="vertical layout">
-        <paper-button class="demo-button" raised on-click="_toggleSelection">Enable Selection: <span>[[_selectEnabled]]</span></paper-button>
-        <paper-button class="demo-button" raised on-click="_toggleMulti">Multi Selection: <span>[[_multiSelect]]</span></paper-button>
-        <paper-button class="demo-button" raised on-click="_toggleDektopMulti">Desktop Multi: <span>[[_desktopMulti]]</span></paper-button>
+        <paper-button class="right-col demo-button" raised on-click="_toggleMulti">Multi Selection: <span>[[_multiSelect]]</span></paper-button>
+        <paper-button class="right-col demo-button" raised on-click="_toggleDektopMulti">Desktop Multi: <span>[[_desktopMulti]]</span></paper-button>
+        <div id="tapDisplay" class="right-col"></div>
       </div>
     </div>
   </template>
   <script>
-      app._selectEnabled = false;
       app._multiSelect = false;
       app._desktopMulti = false;
       app._genFakeData = function() {
@@ -65,14 +74,30 @@
           data.push({
             foo: firstChar + secondChar + firstChar + secondChar,
             bar: secondChar + firstChar + secondChar + firstChar,
-            baz: a.toString() + b.toString(),
-            icon:'polymer'
+            baz: a.toString() + b.toString()
           });
         }
         return data;
       };
-      app._toggleSelection = function() {
-        app._selectEnabled = !app._selectEnabled;
+      app._toggleSelection = function(e) {
+        e.stopPropagation();
+        app.$.grid.applySelectionRules(e);
+      };
+      app._itemSelected = function(e) {
+        var icon = app.$.grid.getRowElementForItem(e.detail).querySelector('iron-icon');
+        app.toggleClass('selected', true, icon);
+        icon.icon = 'check-box';
+      };
+      app._itemDeselected = function(e) {
+        var icon = app.$.grid.getRowElementForItem(e.detail).querySelector('iron-icon');
+        app.toggleClass('selected', false, icon);
+        icon.icon = 'check-box-outline-blank';
+      };
+      app._rowTapped = function(e) {
+        app.$.tapDisplay.innerHTML = 'Tapped Foo: ' + e.detail.row.foo;
+        app.async(function() {
+          app.$.tapDisplay.innerHTML = '';
+        }.bind(app), 1000);
       };
       app._toggleMulti = function() {
         app.$.grid.clearSelection();
