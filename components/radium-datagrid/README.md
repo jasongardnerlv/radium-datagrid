@@ -25,19 +25,22 @@ column.
 
 ### Demos
 
-####[Basic configurations](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/configs.html)
+####[Basic Configurations](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/configs.html)
 Column width, alignment, and grid line/color options. Column sorting also demonstrated.
 
 ####[Data Loading States](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/dataload.html)
 Shows the various states of the grid initial, loading, loaded, and no records
 
-####[Paging footer](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/paging.html)
+####[Paging Footer](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/paging.html)
 Optional footer with paging controls.
 
-####[Item selection](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/selection.html)
+####[Item Selection](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/selection.html)
 Single selection and multi-selection examples (both cross-device and desktop specific).
 
-####[Infinite scroll](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/infinitescroll.html)
+####[Item Selection via Checkbox](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/selectionviaicon.html)
+Single selection and multi-selection examples (both cross-device and desktop specific), this time with a column of checkboxes
+
+####[Infinite Scroll](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/infinitescroll.html)
 Simple infinite scroll example.
 
 ####[Column Filters](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/filters.html)

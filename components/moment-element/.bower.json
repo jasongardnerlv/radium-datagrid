@@ -36,7 +36,7 @@
     "branch": "master",
     "commit": "3057d60ca0400efb340212eb9c66dda102527844"
   },
-  "_source": "git://github.com/jasongardnerlv/moment-element.git",
+  "_source": "https://github.com/jasongardnerlv/moment-element.git",
   "_target": "master",
   "_originalSource": "jasongardnerlv/moment-element"
 }

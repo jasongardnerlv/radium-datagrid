@@ -123,7 +123,6 @@
     </div>
     <paper-dialog id="dateDialog" class="date-picker-dialog" modal on-iron-overlay-closed="_dateDialogClosed">
       <div class="buttons">
-        <paper-button dialog-dismiss>[[_computedTranslate(_gridRef, 'CANCEL', 'Cancel')]]</paper-button>
         <paper-button dialog-confirm>[[_computedTranslate(_gridRef, 'OK', 'OK')]]</paper-button>
       </div>
     </paper-dialog>
@@ -271,7 +270,7 @@
         }
       },
       _formatSimpleDate: function(date) {
-        return (date.getUTCMonth() + 1) + '/' + date.getUTCDate() + '/' + date.getUTCFullYear();
+        return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
       },
       _computedTranslate: function(grid, key, defaultVal) {
         if (grid !== null) {

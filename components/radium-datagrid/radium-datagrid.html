@@ -57,6 +57,12 @@ column.
     #headerRow.scroll-pad {
       margin-right: 15px;
     }
+    #headerRow ::content radium-datagrid-column:first-of-type #dgcolumn {
+      margin-left: 24px;
+    }
+    #headerRow ::content radium-datagrid-column:first-of-type radium-datagrid-column-filter #colFilter {
+      margin-left: 24px;
+    }
     .colHeader {
       min-height: 56px;
       max-height: 56px;
@@ -446,28 +452,26 @@ column.
         }
       },
       _desktopMultiSelectHandler: function(e) {
-        if (this.selectionEnabled) {
-          var evt = e.detail.sourceEvent;
-          if (evt.ctrlKey === false && evt.metaKey === false && evt.shiftKey === false) {
-            this.clearSelection();
-          }
-          var model = this.$.list.modelForElement(e.target);
-          if (model) {
-            var item = model[this.$.list.as];
-            var idx = this.items.indexOf(item);
-            if (evt.shiftKey === true) {
-              if (!isNaN(this._lastSelectedIndex)) {
-                var smaller = (idx < this._lastSelectedIndex) ? idx : this._lastSelectedIndex;
-                var bigger = (idx < this._lastSelectedIndex) ? this._lastSelectedIndex : idx;
-                for (var i = smaller; i <= bigger; i++) {
-                  this.$.list.selectItem(this.items[i]);
-                }
+        var evt = e.detail.sourceEvent;
+        if (evt.ctrlKey === false && evt.metaKey === false && evt.shiftKey === false) {
+          this.clearSelection();
+        }
+        var model = this.$.list.modelForElement(e.target);
+        if (model) {
+          var item = model[this.$.list.as];
+          var idx = this.items.indexOf(item);
+          if (evt.shiftKey === true) {
+            if (!isNaN(this._lastSelectedIndex)) {
+              var smaller = (idx < this._lastSelectedIndex) ? idx : this._lastSelectedIndex;
+              var bigger = (idx < this._lastSelectedIndex) ? this._lastSelectedIndex : idx;
+              for (var i = smaller; i <= bigger; i++) {
+                this.$.list.selectItem(this.items[i]);
               }
-            } else {
-              this.$.list.toggleSelectionForItem(item);
             }
-            this._lastSelectedIndex = idx;
+          } else {
+            this.$.list.toggleSelectionForItem(item);
           }
+          this._lastSelectedIndex = idx;
         }
       },
       _updateGridLines: function(node) {
@@ -484,7 +488,7 @@ column.
         var columns = row.querySelectorAll('radium-datagrid-column');
         var headers = [];
         for (var i = 0; i < columns.length; i++) {
-          var data = columns[i].__data__;
+          var data = JSON.parse(JSON.stringify(columns[i].__data__));
           data.isHeader = true;
           headers.push({data:data,config:columns[i]._aboveConfig});
         };
@@ -493,6 +497,9 @@ column.
       _handleHeaderUpdate: function(e,detail) {
         if (e.detail.prop === 'columnWidth') {
           this._columnWidths = {};
+        }
+        if (e.detail.prop === 'header') {
+          this.set('_headers.' + detail.index + '.config.header', e.target.header);
         }
         this.$.headerRow.children[detail.index][detail.prop] = e.target[detail.prop];
       },
@@ -643,6 +650,46 @@ column.
         this.$.list.toggleSelectionForItem(item);
       },
       /**
+       * Use tap event to apply single/multi selection rules
+       *
+       * @method applySelectionRules
+       * @param {Object} Tap event to apply selection rules to
+       */
+      applySelectionRules: function(event) {
+        if (this.desktopMultiSelection) {
+          this._desktopMultiSelectHandler(event);
+        } else {
+          this.toggleSelectionForItem(this.getItemForTarget(event.target));
+        }
+      },
+      /**
+       * Check if item instance is currently selected
+       *
+       * @method isItemSelected
+       * @param {Object} Item to check
+       */
+      isItemSelected: function(item) {
+        return (this.$.list.$.selector).isSelected(this.$.list._getNormalizedItem(item));
+      },
+      /**
+       * Get the item related to the event target
+       *
+       * @method getItemForTarget
+       * @param {Object} Target used to resolve the item
+       */
+      getItemForTarget: function(target) {
+        return this.$.list.modelForElement(target)[this.$.list.as];
+      },
+      /**
+       * Get the physical row element for a given item
+       *
+       * @method getRowElementForItem
+       * @param {Object} Item used to resolve a row element
+       */
+      getRowElementForItem: function(item) {
+        return this.$.list._getRowFromItem(item);
+      },
+      /**
        * Set the current sort
        *
        * @method setColumnSort
@@ -653,9 +700,6 @@ column.
         var column = this._getColumnHeaderById(colId);
         if (column !== null) {
           column._sortDirection = (desc) ? 'desc' : 'asc';
-          column.fire('sort', {id:colId, direction:column._sortDirection});
-        } else {
-          throw new Error('Unrecognized column: ' + colId);
         }
       },
       /**

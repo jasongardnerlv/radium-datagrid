@@ -75,9 +75,11 @@
         app._selectEnabled = !app._selectEnabled;
       };
       app._toggleMulti = function() {
+        app.$.grid.clearSelection();
         app._multiSelect = !app._multiSelect;
       };
       app._toggleDektopMulti = function() {
+        app.$.grid.clearSelection();
         app._desktopMulti = !app._desktopMulti;
       };
       app._initialItems = app._genFakeData();

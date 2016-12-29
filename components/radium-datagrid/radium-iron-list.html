@@ -1285,6 +1285,16 @@ will only render 20.
       return null;
     },
 
+    _getRowFromItem: function(item) {
+      var key = this._collection.getKey(item);
+      var pidx = this._physicalIndexForKey[key];
+
+      if (pidx != null) {
+        return this._physicalItems[pidx];
+      }
+      return null;
+    },
+
     /**
      * Gets a valid item instance from its index or the object value.
      *
@@ -1322,6 +1332,7 @@ will only render 20.
       }
       this.$.selector.select(item);
       this.updateSizeForItem(item);
+      this.fire('item-select', item);
     },
 
     /**
@@ -1340,6 +1351,7 @@ will only render 20.
       }
       this.$.selector.deselect(item);
       this.updateSizeForItem(item);
+      this.fire('item-deselect', item);
     },
 
     /**
@@ -1369,6 +1381,7 @@ will only render 20.
         if (model) {
           model[this.selectedAs] = false;
         }
+        this.fire('item-deselect', item);
       }
 
       if (Array.isArray(this.selectedItems)) {

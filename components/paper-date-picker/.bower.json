@@ -46,7 +46,7 @@
     "branch": "master",
     "commit": "0358ab8ab3e51f06d3fb0e6727ec11cce5a879d3"
   },
-  "_source": "git://github.com/jasongardnerlv/paper-date-picker.git",
+  "_source": "https://github.com/jasongardnerlv/paper-date-picker.git",
   "_target": "master",
   "_originalSource": "jasongardnerlv/paper-date-picker"
 }
