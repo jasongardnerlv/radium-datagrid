@@ -31,7 +31,18 @@
         }
       },
       _tapHander: function(e) {
-        this.fire('row-tap', {row:this.dataHost.row,sourceEvent:e});
+        var column = e.target, target = e.target, i = 0;
+        while (i < 20) {
+          if (target.nodeName.toLowerCase() === 'radium-datagrid-column') {
+            column = target;
+            break;
+          }
+          target = target.parentNode;
+          i++;
+        }
+        if (column.hasAttribute('ignore-row-tap') === false) {
+          this.fire('row-tap', {row:this.dataHost.row,sourceEvent:e});
+        }
       },
       attached: function() {
         var grid = this.domHost;
