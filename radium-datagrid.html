@@ -496,11 +496,16 @@ column.
         this._headers = headers;
       },
       _handleHeaderUpdate: function(e,detail) {
-        if (e.detail.prop === 'columnWidth') {
-          this._columnWidths = {};
-        }
-        if (e.detail.prop === 'header') {
-          this.set('_headers.' + detail.index + '.config.header', e.target.header);
+        switch (e.detail.prop) {
+          case 'columnWidth':
+            this._columnWidths = {};
+            break;
+          case 'header':
+            this.set('_headers.' + detail.index + '.config.header', e.target.header);
+            break;
+          case 'sortable':
+            this.set('_headers.' + detail.index + '.config.sortable', e.target.sortable);
+            break;
         }
         this.$.headerRow.children[detail.index][detail.prop] = e.target[detail.prop];
       },
