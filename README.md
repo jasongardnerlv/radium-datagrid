@@ -1,6 +1,6 @@
-#Radium Datagrid
+# Radium Datagrid
 
-######A Material Design inspired data grid element for Polymer.js apps.
+###### A Material Design inspired data grid element for Polymer.js apps.
 
 This element uses, as an initial foundation, the Google Material Design specification for data tables:
 [Data Tables](https://www.google.com/design/spec/components/data-tables.html)
@@ -25,26 +25,26 @@ column.
 
 ### Demos
 
-####[Basic Configurations](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/configs.html)
+#### [Basic Configurations](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/configs.html)
 Column width, alignment, and grid line/color options. Column sorting also demonstrated.
 
-####[Data Loading States](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/dataload.html)
+#### [Data Loading States](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/dataload.html)
 Shows the various states of the grid initial, loading, loaded, and no records
 
-####[Paging Footer](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/paging.html)
+#### [Paging Footer](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/paging.html)
 Optional footer with paging controls.
 
-####[Item Selection](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/selection.html)
+#### [Item Selection](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/selection.html)
 Single selection and multi-selection examples (both cross-device and desktop specific).
 
-####[Item Selection via Checkbox](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/selectionviaicon.html)
+#### [Item Selection via Checkbox](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/selectionviaicon.html)
 Single selection and multi-selection examples (both cross-device and desktop specific), this time with a column of checkboxes
 
-####[Infinite Scroll](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/infinitescroll.html)
+#### [Infinite Scroll](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/infinitescroll.html)
 Simple infinite scroll example.
 
-####[Column Filters](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/filters.html)
+#### [Column Filters](http://jasongardnerlv.github.io/radium-datagrid/components/radium-datagrid/demo/filters.html)
 Toggle inputs on column headers to filter data.
 
-###License
+### License
 MIT Licensed
